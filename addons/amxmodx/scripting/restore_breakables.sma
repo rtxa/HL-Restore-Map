@@ -180,17 +180,17 @@ RestoreBreakable(ent) {
 		set_pev(ent, pev_flags, pev(ent, pev_flags) | FL_WORLDBRUSH);
 	}
 
-	// Fix from ReGameDLL: remove entity spawned by the breakable
+	// remove entity spawned by the breakable by checking his owner
 	new ofsSpawnObject = get_ent_data(ent, "CBreakable", "m_iszSpawnObject");
 	if (ofsSpawnObject) {
 		new objectName[32];
 		get_string_int(ofsSpawnObject, objectName, charsmax(objectName));
 
-		new ent, classname[32];
-		while ((ent = find_ent_by_class(ent, objectName))) {
-			pev(pev(ent, pev_owner), pev_classname, classname, charsmax(classname));
-			if (pev(ent, pev_owner) && equal(classname, "func_breakable")) {
-				remove_entity(ent);
+		new entid;
+		while ((entid = find_ent_by_class(entid, objectName))) {
+			// this object is from the func_breakable?
+			if (pev(entid, pev_owner) == ent) {
+				remove_entity(entid);
 			}
 		}
 	}
