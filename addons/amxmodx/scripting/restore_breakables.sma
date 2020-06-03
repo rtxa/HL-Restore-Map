@@ -53,8 +53,8 @@ public plugin_init() {
 }
 
 public plugin_natives() {
-	register_native("hl_restore_breakable", "native_restore_breakable");
-	register_native("hl_restore_pushable", "native_restore_pushable");
+	register_native("hl_restore_breakables", "native_restore_breakables");
+	register_native("hl_restore_pushables", "native_restore_pushables");
 }
 
 #if defined DEBUG
@@ -284,7 +284,7 @@ stock get_string_int(offset, const string[], const size) {
 		global_get(glb_pStringBase, offset, string, size);
 }
 
-public native_restore_breakable(plugin_id, argc) {
+public native_restore_breakables(plugin_id, argc) {
 	if (argc < 2)
 		return false;
 
@@ -306,7 +306,7 @@ public native_restore_breakable(plugin_id, argc) {
 	return true;
 }
 
-public native_restore_pushable(plugin_id, argc) {
+public native_restore_pushables(plugin_id, argc) {
 	if (argc < 2)
 		return false;
 

@@ -13,7 +13,7 @@
  * @error           If an invalid entity index is provided, an error will be
  *                  thrown.
  */
-native hl_restore_breakable(ent = 0, bool:all = false);
+native hl_restore_breakables(ent = 0, bool:all = false);
 
 /** 
  * Restore a func_pushable entity.
@@ -25,4 +25,4 @@ native hl_restore_breakable(ent = 0, bool:all = false);
  * @error           If an invalid entity index is provided, an error will be
  *                  thrown.
  */
-native hl_restore_pushable(ent = 0, bool:all = false);
+native hl_restore_pushables(ent = 0, bool:all = false);
