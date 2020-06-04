@@ -4,7 +4,7 @@
 #define _restore_map_included
 
 /** 
- * Restore a func_breakable entity.
+ * Restores a func_breakable entity.
  * 
  * @param ent 		Entity index.
  * @param all		Set true to restore all func_breakable entities.
@@ -16,7 +16,7 @@
 native hl_restore_breakables(ent = 0, bool:all = false);
 
 /** 
- * Restore a func_pushable entity.
+ * Restores a func_pushable entity.
  * 
  * @param ent 		Entity index.
  * @param all		Set true to restore all func_pushable entities.
@@ -26,3 +26,15 @@ native hl_restore_breakables(ent = 0, bool:all = false);
  *                  thrown.
  */
 native hl_restore_pushables(ent = 0, bool:all = false);
+
+/** 
+ * Restores a func_door entity.
+ * 
+ * @param ent 		Entity index.
+ * @param all		Set true to restore all func_door entities.
+ *
+ * @noreturn
+ * @error           If an invalid entity index is provided, an error will be
+ *                  thrown.
+ */
+native hl_restore_doors(ent = 0, bool:all = false);
