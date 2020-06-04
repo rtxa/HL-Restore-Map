@@ -19,19 +19,21 @@
 
 public plugin_precache() {
 	RegisterHam(Ham_Spawn, "func_door", "OnDoorSpawn_Post", true);
+	RegisterHam(Ham_Spawn, "func_door_rotating", "OnRotDoorSpawn_Post", true);
 }
 
 public plugin_init() {
 	register_plugin(PLUGIN, VERSION, AUTHOR);
 
 #if defined DEBUG
-	//register_concmd("entid", "CmdEntId");
+	register_concmd("d_entid", "CmdEntId");
 	register_concmd("d_rentid", "CmdRestoreEntId");
 #endif
 }
 
 public plugin_natives() {
 	register_native("hl_restore_doors", "native_restore_doors");
+	register_native("hl_restore_rot_doors", "native_restore_rot_doors");
 }
 
 #if defined DEBUG
@@ -66,6 +68,7 @@ public CmdRestoreEntId(id) {
 
 	if (!ent) {
 		RestoreAllDoors();
+		RestoreAllRotDoors();
 	} else {
 		if (pev_valid(ent) != 2) {
 			console_print(id, "Invalid entity: %d", ent);
@@ -85,9 +88,9 @@ public CmdRestoreEntId(id) {
 
 public OnDoorSpawn_Post(ent) {
 	set_pev(ent, Pev_SavedTouchAdress, get_ent_data(ent, "CBaseEntity", "m_pfnTouch"));	
-	set_pev(ent, Pev_SavedToggleState, get_ent_data(ent, "CBaseToggle", "m_toggle_state"));
 
 	// not used but leaved just in case my method doesn't works
+	set_pev(ent, Pev_SavedToggleState, get_ent_data(ent, "CBaseToggle", "m_toggle_state"));
 	set_pev(ent, Pev_SavedMaster, get_ent_data(ent, "CBaseToggle", "m_sMaster"));
 	set_pev(ent, Pev_SavedSpawnFlags, pev(ent, pev_spawnflags));
 }
@@ -134,6 +137,66 @@ SetMovedir(ent) {
 	set_pev(ent, pev_angles, Float:{0.0, 0.0, 0.0});
 }
 
+public OnRotDoorSpawn_Post(ent) {
+	set_pev(ent, Pev_SavedTouchAdress, get_ent_data(ent, "CBaseEntity", "m_pfnTouch"));	
+
+	// not used but leaved just in case my method doesn't works
+	set_pev(ent, Pev_SavedToggleState, get_ent_data(ent, "CBaseToggle", "m_toggle_state"));
+	set_pev(ent, Pev_SavedMaster, get_ent_data(ent, "CBaseToggle", "m_sMaster"));
+	set_pev(ent, Pev_SavedSpawnFlags, pev(ent, pev_spawnflags));
+}
+
+RestoreRotDoor(ent) {
+	AxisDir(ent);
+	set_ent_data(ent, "CBaseToggle", "m_toggle_state", TS_AT_BOTTOM);
+	
+	RotDoorResetPos(ent);
+
+	if (pev(ent, pev_spawnflags) & SF_DOOR_USE_ONLY) {
+		set_ent_data(ent, "CBaseEntity", "m_pfnTouch", 0);
+	} else {
+		set_ent_data(ent, "CBaseEntity", "m_pfnTouch", pev(ent, Pev_SavedTouchAdress));
+	}
+}
+
+RotDoorResetPos(ent) {
+	// cancel any movement being done
+	set_ent_data(ent, "CBaseEntity", "m_pfnThink", 0);
+	set_ent_data(ent, "CBaseToggle", "m_pfnCallWhenMoveDone", 0);
+	set_pev(ent, pev_avelocity, Float:{0.0, 0.0, 0.0});
+
+	if (pev(ent, pev_spawnflags) & SF_DOOR_ROTATE_BACKWARDS) {
+		new Float:movedir[3];
+		set_pev(ent, pev_movedir, movedir)
+		xs_vec_mul_scalar(movedir, -1.0, movedir);
+		set_pev(ent, pev_movedir, movedir);
+	}
+
+	if (pev(ent, pev_speed) == 0)
+		set_pev(ent, pev_speed, 100);
+
+	new Float:angle1[3];
+	get_ent_data_vector(ent, "CBaseToggle", "m_vecAngle1", angle1);
+	set_pev(ent, pev_angles, angle1);
+}
+
+AxisDir(ent) {
+	if (pev(ent, pev_spawnflags) & SF_DOOR_ROTATE_Z) {
+		set_pev(ent, pev_movedir, Float:{0.0, 0.0, 1.0});
+	} else if (pev(ent, pev_spawnflags) & SF_DOOR_ROTATE_X) {
+		set_pev(ent, pev_movedir, Float:{1.0, 0.0, 0.0});
+	} else {
+		set_pev(ent, pev_movedir, Float:{0.0, 1.0, 0.0});
+	}
+}
+
+RestoreAllRotDoors() {
+	new ent;
+	while ((ent = find_ent_by_class(ent, "func_door_rotating"))) {
+		RestoreRotDoor(ent);
+	}
+}
+
 public native_restore_doors(plugin_id, argc) {
 	if (argc < 2)
 		return false;
@@ -152,6 +215,28 @@ public native_restore_doors(plugin_id, argc) {
 	}
 
 	RestoreDoor(ent);
+
+	return true;
+}
+
+public native_restore_rot_doors(plugin_id, argc) {
+	if (argc < 2)
+		return false;
+
+	new ent = get_param(1);
+	new all = get_param(2);
+
+	if (all) {
+		RestoreAllRotDoors();
+		return true;
+	}
+
+	if (pev_valid(ent) != 2) {
+		log_amx("Invalid entity: %d", ent);
+		return false;
+	}
+
+	RestoreRotDoor(ent);
 
 	return true;
 }

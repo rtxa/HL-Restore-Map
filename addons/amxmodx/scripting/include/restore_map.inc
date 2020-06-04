@@ -38,3 +38,15 @@ native hl_restore_pushables(ent = 0, bool:all = false);
  *                  thrown.
  */
 native hl_restore_doors(ent = 0, bool:all = false);
+
+/** 
+ * Restores a func_door_rotating entity.
+ * 
+ * @param ent 		Entity index.
+ * @param all		Set true to restore all func_door_rotating entities.
+ *
+ * @noreturn
+ * @error           If an invalid entity index is provided, an error will be
+ *                  thrown.
+ */
+native hl_restore_rot_doors(ent = 0, bool:all = false);
