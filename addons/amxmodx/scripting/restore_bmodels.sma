@@ -36,6 +36,7 @@ public plugin_init() {
 
 public plugin_natives() {
 	register_native("hl_restore_func_rotating", "native_restore_func_rotating");
+	register_native("hl_restore_func_wall_toggle", "native_restore_func_wall_toggle");
 }
 
 #if defined DEBUG
@@ -44,6 +45,7 @@ public CmdRestoreEntId(id) {
 
 	if (!ent) {
 		RestoreAllFuncRotating();
+		RestoreAllFuncWallToggle();
 	} else {
 		if (pev_valid(ent) != 2) {
 			console_print(id, "Invalid entity: %d", ent);
@@ -153,6 +155,65 @@ public native_restore_func_rotating(plugin_id, argc) {
 
 	return true;
 }
+
+// ================= func_wall_toggle ===========================
+
+RestoreFuncWallToggle(ent) {
+	ExecuteHam(Ham_Spawn, ent);
+	if (pev(ent, pev_spawnflags) & SF_WALL_START_OFF)
+		TurnOffWallToggle(ent);
+	else
+		TurnOnWallToggle(ent);
+}
+
+RestoreAllFuncWallToggle() {
+	new ent;
+	while ((ent = find_ent_by_class(ent, "func_wall_toggle"))) {
+		RestoreFuncWallToggle(ent);
+	}
+}
+
+TurnOnWallToggle(ent) {
+	set_pev(ent, pev_solid, SOLID_BSP);
+	set_pev(ent, pev_effects, pev(ent, pev_effects) & ~EF_NODRAW);
+
+	new Float:origin[3];
+	pev(ent, pev_origin, origin);	
+	engfunc(EngFunc_SetOrigin, ent, origin);
+}
+
+TurnOffWallToggle(ent) {
+	set_pev(ent, pev_solid, SOLID_NOT);
+	set_pev(ent, pev_effects, pev(ent, pev_effects) | EF_NODRAW);
+	
+	new Float:origin[3];
+	pev(ent, pev_origin, origin);	
+	engfunc(EngFunc_SetOrigin, ent, origin);
+}
+
+public native_restore_func_wall_toggle(plugin_id, argc) {
+	if (argc < 2)
+		return false;
+
+	new ent = get_param(1);
+	new all = get_param(2);
+
+	if (all) {
+		RestoreAllFuncWallToggle();
+		return true;
+	}
+
+	if (pev_valid(ent) != 2) {
+		log_amx("Invalid entity: %d", ent);
+		return false;
+	}
+
+	RestoreFuncWallToggle(ent);
+
+	return true;
+}
+
+// ======================== useful stocks ============================================
 
 stock get_string_int(offset, const string[], const size) {
 	if (size != 0)
