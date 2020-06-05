@@ -13,8 +13,8 @@
 #define DEBUG 1
 
 public plugin_precache() {
-	RegisterHam(Ham_Spawn, "trigger_once", "OnTriggerSpawn_Post", true);
-	RegisterHam(Ham_Think, "trigger_once", "OnTriggerThink_Pre");
+	RegisterHam(Ham_Spawn, "trigger_once", "OnTriggerOnceSpawn_Post", true);
+	RegisterHam(Ham_Think, "trigger_once", "OnTriggerOnceThink_Pre");
 }
 
 public plugin_init() {
@@ -35,7 +35,7 @@ public CmdRestoreEntId(id) {
 	new ent = read_argv_int(1);
 
 	if (!ent) {
-		RestoreAllTriggers();
+		RestoreAllTriggerOnce();
 		RestoreAllTriggerPush();
 	} else {
 		if (pev_valid(ent) != 2) {
@@ -52,12 +52,12 @@ public CmdRestoreEntId(id) {
 }
 #endif
 
-public OnTriggerSpawn_Post(ent) {
+public OnTriggerOnceSpawn_Post(ent) {
     // set to -2.0, this way we can make sure the entity isn't deleted
     set_ent_data_float(ent, "CBaseToggle", "m_flWait", -2.0)
 }
 
-public OnTriggerThink_Pre(ent) {
+public OnTriggerOnceThink_Pre(ent) {
     if (get_ent_data_float(ent, "CBaseToggle", "m_flWait") == -2.0) {
         set_ent_data(ent, "CBaseEntity", "m_pfnThink", 0);
         return HAM_SUPERCEDE;
@@ -65,16 +65,16 @@ public OnTriggerThink_Pre(ent) {
     return HAM_IGNORED;
 }
 
-RestoreTrigger(ent) {
+RestoreTriggerOnce(ent) {
     // set to -2.0, this way we can make sure the entity isn't deleted
     set_ent_data_float(ent, "CBaseToggle", "m_flWait", -2.0)
     dllfunc(DLLFunc_Spawn, ent);
 }
 
-RestoreAllTriggers() {
+RestoreAllTriggerOnce() {
 	new ent;
 	while ((ent = find_ent_by_class(ent, "trigger_once"))) {
-        RestoreTrigger(ent);
+        RestoreTriggerOnce(ent);
 	}
 }
 
@@ -102,7 +102,7 @@ public native_restore_trigger_once(plugin_id, argc) {
 	new all = get_param(2);
 
 	if (all) {
-		RestoreAllTriggers();
+		RestoreAllTriggerOnce();
 		return true;
 	}
 
@@ -111,7 +111,7 @@ public native_restore_trigger_once(plugin_id, argc) {
 		return false;
 	}
 
-	RestoreTrigger(ent);
+	RestoreTriggerOnce(ent);
 
 	return true;
 }
