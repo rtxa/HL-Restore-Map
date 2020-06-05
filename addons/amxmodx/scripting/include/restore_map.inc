@@ -110,3 +110,15 @@ native hl_restore_trigger_push(ent = 0, bool:all = false);
  *                  thrown.
  */
 native hl_restore_multi_manager(ent = 0, bool:all = false);
+
+/** 
+ * Restores a func_rotating entity.
+ * 
+ * @param ent 		Entity index.
+ * @param all		Set true to restore all func_rotating entities.
+ *
+ * @noreturn
+ * @error           If an invalid entity index is provided, an error will be
+ *                  thrown.
+ */
+native hl_restore_func_rotating(ent = 0, bool:all = false);
