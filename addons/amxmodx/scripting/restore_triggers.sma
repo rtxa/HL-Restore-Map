@@ -12,7 +12,10 @@
 
 #define DEBUG 1
 
+#define Pev_SavedUseAdress pev_iuser4
+
 public plugin_precache() {
+	RegisterHam(Ham_Spawn, "multi_manager", "OnMultiManagerSpawn_Post", true);
 	RegisterHam(Ham_Spawn, "trigger_once", "OnTriggerOnceSpawn_Post", true);
 	RegisterHam(Ham_Think, "trigger_once", "OnTriggerOnceThink_Pre");
 }
@@ -26,6 +29,7 @@ public plugin_init() {
 }
 
 public plugin_natives() {
+	register_native("hl_restore_multi_manager", "native_restore_multi_manager");
 	register_native("hl_restore_trigger_once", "native_restore_trigger_once");
 	register_native("hl_restore_trigger_push", "native_restore_trigger_push");
 }
@@ -36,6 +40,7 @@ public CmdRestoreEntId(id) {
 
 	if (!ent) {
 		RestoreAllTriggerOnce();
+		RestoreAllMultiManager();
 		RestoreAllTriggerPush();
 	} else {
 		if (pev_valid(ent) != 2) {
@@ -93,6 +98,31 @@ RestoreAllTriggerPush() {
 	}
 }
 
+public OnMultiManagerSpawn_Post(ent) {
+	set_pev(ent, Pev_SavedUseAdress, get_ent_data(ent, "CBaseEntity", "m_pfnUse"));
+}
+
+RestoreMultiManager(ent) {
+	if (IsClone(ent)) {
+		remove_entity(ent);
+		return;
+	}
+
+	set_ent_data(ent, "CBaseEntity", "m_pfnThink", 0);
+	set_ent_data(ent, "CBaseEntity", "m_pfnUse", pev(ent, Pev_SavedUseAdress));
+	set_ent_data(ent, "CMultiManager", "m_index", 0);
+}
+
+RestoreAllMultiManager() {
+	new ent;
+	while ((ent = find_ent_by_class(ent, "multi_manager"))) {
+        RestoreMultiManager(ent);
+	}
+}
+
+IsClone(ent) {
+	return pev(ent, pev_spawnflags) & SF_MULTIMAN_CLONE ? true : false;
+}
 
 public native_restore_trigger_once(plugin_id, argc) {
 	if (argc < 2)
@@ -134,6 +164,28 @@ public native_restore_trigger_push(plugin_id, argc) {
 	}
 
 	RestoreTriggerPush(ent);
+
+	return true;
+}
+
+public native_restore_multi_manager(plugin_id, argc) {
+	if (argc < 2)
+		return false;
+
+	new ent = get_param(1);
+	new all = get_param(2);
+
+	if (all) {
+		RestoreAllMultiManager();
+		return true;
+	}
+
+	if (pev_valid(ent) != 2) {
+		log_amx("Invalid entity: %d", ent);
+		return false;
+	}
+
+	RestoreMultiManager(ent);
 
 	return true;
 }

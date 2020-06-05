@@ -98,3 +98,15 @@ native hl_restore_trigger_once(ent = 0, bool:all = false);
  *                  thrown.
  */
 native hl_restore_trigger_push(ent = 0, bool:all = false);
+
+/** 
+ * Restores a multi_manager entity.
+ * 
+ * @param ent 		Entity index.
+ * @param all		Set true to restore all multi_manager entities.
+ *
+ * @noreturn
+ * @error           If an invalid entity index is provided, an error will be
+ *                  thrown.
+ */
+native hl_restore_multi_manager(ent = 0, bool:all = false);
