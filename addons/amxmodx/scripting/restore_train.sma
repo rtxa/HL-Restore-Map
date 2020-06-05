@@ -54,7 +54,7 @@ public CmdRestoreEntId(id) {
 #endif
 
 public OnTrackTrainSpawn_Post(ent) {
-	set_pev(ent, Pev_SavedThinkAdress, get_ent_data(ent, "CBaseEntity", "m_pfnTouch"));	
+	set_pev(ent, Pev_SavedThinkAdress, get_ent_data(ent, "CBaseEntity", "m_pfnThink"));	
 }
 
 RestoreTrackTrain(ent) {	
