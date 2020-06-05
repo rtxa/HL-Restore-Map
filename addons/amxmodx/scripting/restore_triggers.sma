@@ -21,12 +21,13 @@ public plugin_init() {
 	register_plugin(PLUGIN, VERSION, AUTHOR);
 
 #if defined DEBUG
-	register_concmd("t_once_rentid", "CmdRestoreEntId");
+	register_concmd("triggers_rentid", "CmdRestoreEntId");
 #endif
 }
 
 public plugin_natives() {
 	register_native("hl_restore_trigger_once", "native_restore_trigger_once");
+	register_native("hl_restore_trigger_push", "native_restore_trigger_push");
 }
 
 #if defined DEBUG
@@ -35,6 +36,7 @@ public CmdRestoreEntId(id) {
 
 	if (!ent) {
 		RestoreAllTriggers();
+		RestoreAllTriggerPush();
 	} else {
 		if (pev_valid(ent) != 2) {
 			console_print(id, "Invalid entity: %d", ent);
@@ -76,6 +78,21 @@ RestoreAllTriggers() {
 	}
 }
 
+RestoreTriggerPush(ent) {
+	// is it required to restore movedir? no idea but regamedll does this for a reason
+	new Float:movedir[3];
+	pev(ent, pev_movedir, movedir);
+	ExecuteHam(Ham_Spawn, ent);
+	set_pev(ent, pev_movedir, movedir);
+}
+
+RestoreAllTriggerPush() {
+	new ent;
+	while ((ent = find_ent_by_class(ent, "trigger_push"))) {
+        RestoreTriggerPush(ent);
+	}
+}
+
 
 public native_restore_trigger_once(plugin_id, argc) {
 	if (argc < 2)
@@ -95,6 +112,28 @@ public native_restore_trigger_once(plugin_id, argc) {
 	}
 
 	RestoreTrigger(ent);
+
+	return true;
+}
+
+public native_restore_trigger_push(plugin_id, argc) {
+	if (argc < 2)
+		return false;
+
+	new ent = get_param(1);
+	new all = get_param(2);
+
+	if (all) {
+		RestoreAllTriggerPush();
+		return true;
+	}
+
+	if (pev_valid(ent) != 2) {
+		log_amx("Invalid entity: %d", ent);
+		return false;
+	}
+
+	RestoreTriggerPush(ent);
 
 	return true;
 }
