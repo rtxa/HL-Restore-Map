@@ -115,13 +115,32 @@ RestoreTrain(ent) {
 	set_ent_data_entity(ent, "CFuncTrain", "m_pevCurrentTarget", firstTarget);
 
 	// cancel any movement being done
+	set_pev(ent, pev_nextthink, 0.0);
 	set_ent_data(ent, "CBaseEntity", "m_pfnThink", 0);
 	set_ent_data(ent, "CBaseToggle", "m_pfnCallWhenMoveDone", 0);
 	set_pev(ent, pev_velocity, Float:{0.0, 0.0, 0.0});
-	set_pev(ent, pev_avelocity, Float:{0.0, 0.0, 0.0});
+	SetMovedir(ent);
 
 	set_ent_data(ent, "CFuncTrain", "m_activated", false);
+
 	ExecuteHam(Ham_Activate, ent);
+}
+
+SetMovedir(ent) {
+	new Float:angles[3];
+	pev(ent, pev_angles, angles);
+	if (xs_vec_equal(angles, Float:{0.0, -1.0, 0.0})) {
+		set_pev(ent, pev_movedir, Float:{0.0, 0.0, 1.0});
+	} else if (xs_vec_equal(angles, Float:{0.0, -2.0, 0.0})) {
+		set_pev(ent, pev_movedir, Float:{0.0, 0.0, -1.0});
+	} else {
+		engfunc(EngFunc_MakeVectors, angles);
+		set_pev(ent, pev_angles, angles);
+		new Float:v_forward[3];
+		global_get(glb_v_forward, v_forward);
+		set_pev(ent, pev_movedir, v_forward);
+	}
+	set_pev(ent, pev_angles, Float:{0.0, 0.0, 0.0});
 }
 
 RestoreAllTrain() {
