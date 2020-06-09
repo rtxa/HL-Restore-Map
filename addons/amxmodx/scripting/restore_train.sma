@@ -86,7 +86,7 @@ RestoreTrain(ent) {
 	new Float:speed;
 	pev(ent, pev_speed, speed)
 	if (speed == 0.0)
-		set_pev(ent, pev_speed, 0.0);
+		set_pev(ent, pev_speed, 100.0);
 
 	new Float:dmg;
 	pev(ent, pev_dmg, dmg);
@@ -106,12 +106,15 @@ RestoreTrain(ent) {
 	// restore ent target to his first target
 	new firstTarget = pev(ent, Pev_FirstTarget);
 
-	if (firstTarget != FM_NULLENT) {
+	if (firstTarget) {
 		new target[32];
 		pev(firstTarget, pev_targetname, target, charsmax(target));
 		set_pev(ent, pev_target, target);
+	} else {
+		firstTarget = FM_NULLENT; // set_ent_data_entity requires this
 	}
 
+	// update to current target
 	set_ent_data_entity(ent, "CFuncTrain", "m_pevCurrentTarget", firstTarget);
 
 	// cancel any movement being done
