@@ -30,6 +30,7 @@ public plugin_init() {
 
 public plugin_natives() {
 	register_native("hl_restore_multi_manager", "native_restore_multi_manager");
+	register_native("hl_restore_trigger_auto", "native_restore_trigger_auto");
 	register_native("hl_restore_trigger_once", "native_restore_trigger_once");
 	register_native("hl_restore_trigger_push", "native_restore_trigger_push");
 }
@@ -95,6 +96,17 @@ RestoreAllTriggerPush() {
 	new ent;
 	while ((ent = find_ent_by_class(ent, "trigger_push"))) {
         RestoreTriggerPush(ent);
+	}
+}
+
+RestoreTriggerAuto(ent) {
+	set_pev(ent, pev_nextthink, get_gametime() + 0.1);
+}
+
+RestoreAllTriggerAuto() {
+	new ent;
+	while ((ent = find_ent_by_class(ent, "trigger_auto"))) {
+        RestoreTriggerAuto(ent);
 	}
 }
 
@@ -164,6 +176,28 @@ public native_restore_trigger_push(plugin_id, argc) {
 	}
 
 	RestoreTriggerPush(ent);
+
+	return true;
+}
+
+public native_restore_trigger_auto(plugin_id, argc) {
+	if (argc < 2)
+		return false;
+
+	new ent = get_param(1);
+	new all = get_param(2);
+
+	if (all) {
+		RestoreAllTriggerAuto();
+		return true;
+	}
+
+	if (pev_valid(ent) != 2) {
+		log_amx("Invalid entity: %d", ent);
+		return false;
+	}
+
+	RestoreTriggerAuto(ent);
 
 	return true;
 }

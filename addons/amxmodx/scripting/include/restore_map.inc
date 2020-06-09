@@ -88,6 +88,18 @@ native hl_restore_tracktrain(ent = 0, bool:all = false);
 native hl_restore_trigger_once(ent = 0, bool:all = false);
 
 /** 
+ * Restores a trigger_auto entity.
+ * 
+ * @param ent 		Entity index.
+ * @param all		Set true to restore all trigger_auto entities.
+ *
+ * @noreturn
+ * @error           If an invalid entity index is provided, an error will be
+ *                  thrown.
+ */
+native hl_restore_trigger_auto(ent = 0, bool:all = false);
+
+/** 
  * Restores a trigger_push entity.
  * 
  * @param ent 		Entity index.
