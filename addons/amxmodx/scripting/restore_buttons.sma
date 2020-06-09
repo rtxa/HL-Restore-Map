@@ -20,7 +20,7 @@
 
 public plugin_precache() {
 	RegisterHam(Ham_Spawn, "func_button", "OnButtonSpawn_Post", true);
-	//RegisterHam(Ham_Spawn, "func_door_rotating", "OnRotDoorSpawn_Post", true);
+	RegisterHam(Ham_Spawn, "func_rot_button", "OnRotButtonSpawn_Post", true);
 }
 
 public plugin_init() {
@@ -33,7 +33,7 @@ public plugin_init() {
 
 public plugin_natives() {
 	register_native("hl_restore_buttons", "native_restore_buttons");
-	//register_native("hl_restore_rot_doors", "native_restore_rot_doors");
+	register_native("hl_restore_rot_buttons", "native_restore_rot_buttons");
 }
 
 #if defined DEBUG
@@ -63,11 +63,19 @@ RestoreAllButtons() {
 	}
 }
 
+RestoreAllRotButtons() {
+	new ent;
+	while ((ent = find_ent_by_class(ent, "func_rot_button"))) {
+		RestoreRotButton(ent);
+	}
+}
+
 public CmdRestoreEntId(id) {
 	new ent = read_argv_int(1);
 
 	if (!ent) {
 		RestoreAllButtons();
+		RestoreAllRotButtons();
 	} else {
 		if (pev_valid(ent) != 2) {
 			console_print(id, "Invalid entity: %d", ent);
@@ -133,29 +141,28 @@ SetMovedir(ent) {
 	set_pev(ent, pev_angles, Float:{0.0, 0.0, 0.0});
 }
 
-public OnRotDoorSpawn_Post(ent) {
+public OnRotButtonSpawn_Post(ent) {
 	set_pev(ent, Pev_SavedTouchAdress, get_ent_data(ent, "CBaseEntity", "m_pfnTouch"));	
-
-	// not used but leaved just in case my method doesn't works
-	set_pev(ent, Pev_SavedToggleState, get_ent_data(ent, "CBaseToggle", "m_toggle_state"));
-	set_pev(ent, Pev_SavedMaster, get_ent_data(ent, "CBaseToggle", "m_sMaster"));
-	set_pev(ent, Pev_SavedSpawnFlags, pev(ent, pev_spawnflags));
+	set_pev(ent, Pev_SavedUseAdress, get_ent_data(ent, "CBaseEntity", "m_pfnUse"));	
 }
 
-RestoreRotDoor(ent) {
+RestoreRotButton(ent) {
 	AxisDir(ent);
 	set_ent_data(ent, "CBaseToggle", "m_toggle_state", TS_AT_BOTTOM);
 	
-	RotDoorResetPos(ent);
+	RotButtonResetPos(ent);
 
-	if (pev(ent, pev_spawnflags) & SF_DOOR_USE_ONLY) {
-		set_ent_data(ent, "CBaseEntity", "m_pfnTouch", 0);
-	} else {
+	set_pev(ent, pev_frame, 0.0);
+
+	if (pev(ent, pev_spawnflags) & SF_BUTTON_TOUCH_ONLY) {
 		set_ent_data(ent, "CBaseEntity", "m_pfnTouch", pev(ent, Pev_SavedTouchAdress));
+	} else {
+		set_ent_data(ent, "CBaseEntity", "m_pfnTouch", 0);
+		set_ent_data(ent, "CBaseEntity", "m_pfnUse", pev(ent, Pev_SavedUseAdress));        
 	}
 }
 
-RotDoorResetPos(ent) {
+RotButtonResetPos(ent) {
 	// cancel any movement being done
 	set_ent_data(ent, "CBaseEntity", "m_pfnThink", 0);
 	set_ent_data(ent, "CBaseToggle", "m_pfnCallWhenMoveDone", 0);
@@ -169,7 +176,7 @@ RotDoorResetPos(ent) {
 	}
 
 	if (pev(ent, pev_speed) == 0)
-		set_pev(ent, pev_speed, 100);
+		set_pev(ent, pev_speed, 40.0);
 
 	new Float:angle1[3];
 	get_ent_data_vector(ent, "CBaseToggle", "m_vecAngle1", angle1);
@@ -183,13 +190,6 @@ AxisDir(ent) {
 		set_pev(ent, pev_movedir, Float:{1.0, 0.0, 0.0});
 	} else {
 		set_pev(ent, pev_movedir, Float:{0.0, 1.0, 0.0});
-	}
-}
-
-RestoreAllRotDoors() {
-	new ent;
-	while ((ent = find_ent_by_class(ent, "func_door_rotating"))) {
-		RestoreRotDoor(ent);
 	}
 }
 
@@ -215,7 +215,7 @@ public native_restore_buttons(plugin_id, argc) {
 	return true;
 }
 
-public native_restore_rot_doors(plugin_id, argc) {
+public native_restore_rot_buttons(plugin_id, argc) {
 	if (argc < 2)
 		return false;
 
@@ -223,7 +223,7 @@ public native_restore_rot_doors(plugin_id, argc) {
 	new all = get_param(2);
 
 	if (all) {
-		RestoreAllRotDoors();
+		RestoreAllRotButtons();
 		return true;
 	}
 
@@ -232,22 +232,7 @@ public native_restore_rot_doors(plugin_id, argc) {
 		return false;
 	}
 
-	RestoreRotDoor(ent);
+	RestoreRotButton(ent);
 
 	return true;
-}
-
-// Not used, but leaved in case my own method doesn't work well.
-stock DoorGoDown(ent) {
-	// hack: we need to use the function DoorGoDown
-	// let's make the entity on purpose
-	set_ent_data(ent, "CBaseToggle", "m_sMaster", 0);
-	set_pev(ent, pev_spawnflags, SF_DOOR_NO_AUTO_RETURN);
-	set_ent_data(ent, "CBaseToggle", "m_toggle_state", TS_AT_TOP);
-	dllfunc(DLLFunc_Use, ent, 0);
-
-	// hack finished, restore entity previous data
-	set_pev(ent, pev_spawnflags, pev(ent, Pev_SavedSpawnFlags));
-	set_ent_data(ent, "CBaseToggle", "m_sMaster", pev(ent, Pev_SavedMaster));
-	set_ent_data(ent, "CBaseToggle", "m_toggle_state", TS_AT_BOTTOM);
 }
