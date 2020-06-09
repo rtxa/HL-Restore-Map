@@ -146,3 +146,27 @@ native hl_restore_func_rotating(ent = 0, bool:all = false);
  *                  thrown.
  */
 native hl_restore_func_wall_toggle(ent = 0, bool:all = false);
+
+/** 
+ * Restores a func_healthcharger entity.
+ * 
+ * @param ent 		Entity index.
+ * @param all		Set true to restore all func_healthcharger entities.
+ *
+ * @noreturn
+ * @error           If an invalid entity index is provided, an error will be
+ *                  thrown.
+ */
+native hl_restore_health_charger(ent = 0, bool:all = false);
+
+/** 
+ * Restores a func_recharge entity.
+ * 
+ * @param ent 		Entity index.
+ * @param all		Set true to restore all func_recharge entities.
+ *
+ * @noreturn
+ * @error           If an invalid entity index is provided, an error will be
+ *                  thrown.
+ */
+native hl_restore_armor_charger(ent = 0, bool:all = false);
