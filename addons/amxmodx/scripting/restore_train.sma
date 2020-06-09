@@ -124,8 +124,12 @@ RestoreTrain(ent) {
 	set_pev(ent, pev_velocity, Float:{0.0, 0.0, 0.0});
 	SetMovedir(ent);
 
-	set_ent_data(ent, "CFuncTrain", "m_activated", false);
+	// stop any current sound
+	new noiseMovement[128];
+	get_string_int(pev(ent, pev_noise), noiseMovement, charsmax(noiseMovement));		
+	emit_sound(ent, CHAN_STATIC, noiseMovement, 0.0, ATTN_NONE, SND_STOP, PITCH_NORM);
 
+	set_ent_data(ent, "CFuncTrain", "m_activated", false);
 	ExecuteHam(Ham_Activate, ent);
 }
 
@@ -234,4 +238,11 @@ public native_restore_tracktrain(plugin_id, argc) {
 	RestoreTrackTrain(ent);
 
 	return true;
+}
+
+// ======================== useful stocks ============================================
+
+stock get_string_int(offset, const string[], const size) {
+	if (size != 0)
+		global_get(glb_pStringBase, offset, string, size);
 }
