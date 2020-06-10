@@ -1,9 +1,8 @@
-#include <amxmisc>
 #include <amxmodx>
 #include <engine>
 #include <fakemeta>
-#include <fun>
 #include <hamsandwich>
+#include <restore_map_stocks>
 #include <xs>
 
 #define PLUGIN  "Restore Buttons"
@@ -27,7 +26,7 @@ public plugin_init() {
 	register_plugin(PLUGIN, VERSION, AUTHOR);
 
 #if defined DEBUG
-	register_concmd("buttons_rentid", "CmdRestoreEntId");
+	register_concmd("buttons_restore", "CmdRestoreEntId");
 #endif
 }
 
@@ -124,23 +123,6 @@ ButtonResetPos(ent) {
 	engfunc(EngFunc_SetOrigin, ent, pos1);
 }
 
-SetMovedir(ent) {
-	new Float:angles[3];
-	pev(ent, pev_angles, angles);
-	if (xs_vec_equal(angles, Float:{0.0, -1.0, 0.0})) {
-		set_pev(ent, pev_movedir, Float:{0.0, 0.0, 1.0});
-	} else if (xs_vec_equal(angles, Float:{0.0, -2.0, 0.0})) {
-		set_pev(ent, pev_movedir, Float:{0.0, 0.0, -1.0});
-	} else {
-		engfunc(EngFunc_MakeVectors, angles);
-		set_pev(ent, pev_angles, angles);
-		new Float:v_forward[3];
-		global_get(glb_v_forward, v_forward);
-		set_pev(ent, pev_movedir, v_forward);
-	}
-	set_pev(ent, pev_angles, Float:{0.0, 0.0, 0.0});
-}
-
 public OnRotButtonSpawn_Post(ent) {
 	set_pev(ent, Pev_SavedTouchAdress, get_ent_data(ent, "CBaseEntity", "m_pfnTouch"));	
 	set_pev(ent, Pev_SavedUseAdress, get_ent_data(ent, "CBaseEntity", "m_pfnUse"));	
@@ -181,16 +163,6 @@ RotButtonResetPos(ent) {
 	new Float:angle1[3];
 	get_ent_data_vector(ent, "CBaseToggle", "m_vecAngle1", angle1);
 	set_pev(ent, pev_angles, angle1);
-}
-
-AxisDir(ent) {
-	if (pev(ent, pev_spawnflags) & SF_DOOR_ROTATE_Z) {
-		set_pev(ent, pev_movedir, Float:{0.0, 0.0, 1.0});
-	} else if (pev(ent, pev_spawnflags) & SF_DOOR_ROTATE_X) {
-		set_pev(ent, pev_movedir, Float:{1.0, 0.0, 0.0});
-	} else {
-		set_pev(ent, pev_movedir, Float:{0.0, 1.0, 0.0});
-	}
 }
 
 public native_restore_buttons(plugin_id, argc) {

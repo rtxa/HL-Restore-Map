@@ -1,20 +1,16 @@
-#include <amxmisc>
 #include <amxmodx>
 #include <engine>
 #include <fakemeta>
-#include <fun>
 #include <hamsandwich>
+#include <restore_map_stocks>
 #include <xs>
 
 #define PLUGIN  "Restore Doors"
-#define VERSION "0.1"
+#define VERSION "0.3"
 #define AUTHOR  "rtxA"
 
 #define DEBUG 1
 
-#define Pev_SavedMaster 		pev_message
-#define Pev_SavedToggleState 	pev_iuser2
-#define Pev_SavedSpawnFlags  	pev_iuser3
 #define Pev_SavedTouchAdress 	pev_iuser4
 
 public plugin_precache() {
@@ -26,8 +22,7 @@ public plugin_init() {
 	register_plugin(PLUGIN, VERSION, AUTHOR);
 
 #if defined DEBUG
-	register_concmd("d_entid", "CmdEntId");
-	register_concmd("d_rentid", "CmdRestoreEntId");
+	register_concmd("doors_restore", "CmdRestoreEntId");
 #endif
 }
 
@@ -88,11 +83,6 @@ public CmdRestoreEntId(id) {
 
 public OnDoorSpawn_Post(ent) {
 	set_pev(ent, Pev_SavedTouchAdress, get_ent_data(ent, "CBaseEntity", "m_pfnTouch"));	
-
-	// not used but leaved just in case my method doesn't works
-	set_pev(ent, Pev_SavedToggleState, get_ent_data(ent, "CBaseToggle", "m_toggle_state"));
-	set_pev(ent, Pev_SavedMaster, get_ent_data(ent, "CBaseToggle", "m_sMaster"));
-	set_pev(ent, Pev_SavedSpawnFlags, pev(ent, pev_spawnflags));
 }
 
 RestoreDoor(ent) {
@@ -120,30 +110,8 @@ DoorResetPos(ent) {
 	engfunc(EngFunc_SetOrigin, ent, pos1);
 }
 
-SetMovedir(ent) {
-	new Float:angles[3];
-	pev(ent, pev_angles, angles);
-	if (xs_vec_equal(angles, Float:{0.0, -1.0, 0.0})) {
-		set_pev(ent, pev_movedir, Float:{0.0, 0.0, 1.0});
-	} else if (xs_vec_equal(angles, Float:{0.0, -2.0, 0.0})) {
-		set_pev(ent, pev_movedir, Float:{0.0, 0.0, -1.0});
-	} else {
-		engfunc(EngFunc_MakeVectors, angles);
-		set_pev(ent, pev_angles, angles);
-		new Float:v_forward[3];
-		global_get(glb_v_forward, v_forward);
-		set_pev(ent, pev_movedir, v_forward);
-	}
-	set_pev(ent, pev_angles, Float:{0.0, 0.0, 0.0});
-}
-
 public OnRotDoorSpawn_Post(ent) {
 	set_pev(ent, Pev_SavedTouchAdress, get_ent_data(ent, "CBaseEntity", "m_pfnTouch"));	
-
-	// not used but leaved just in case my method doesn't works
-	set_pev(ent, Pev_SavedToggleState, get_ent_data(ent, "CBaseToggle", "m_toggle_state"));
-	set_pev(ent, Pev_SavedMaster, get_ent_data(ent, "CBaseToggle", "m_sMaster"));
-	set_pev(ent, Pev_SavedSpawnFlags, pev(ent, pev_spawnflags));
 }
 
 RestoreRotDoor(ent) {
@@ -178,16 +146,6 @@ RotDoorResetPos(ent) {
 	new Float:angle1[3];
 	get_ent_data_vector(ent, "CBaseToggle", "m_vecAngle1", angle1);
 	set_pev(ent, pev_angles, angle1);
-}
-
-AxisDir(ent) {
-	if (pev(ent, pev_spawnflags) & SF_DOOR_ROTATE_Z) {
-		set_pev(ent, pev_movedir, Float:{0.0, 0.0, 1.0});
-	} else if (pev(ent, pev_spawnflags) & SF_DOOR_ROTATE_X) {
-		set_pev(ent, pev_movedir, Float:{1.0, 0.0, 0.0});
-	} else {
-		set_pev(ent, pev_movedir, Float:{0.0, 1.0, 0.0});
-	}
 }
 
 RestoreAllRotDoors() {
@@ -239,19 +197,4 @@ public native_restore_rot_doors(plugin_id, argc) {
 	RestoreRotDoor(ent);
 
 	return true;
-}
-
-// Not used, but leaved in case my own method doesn't work well.
-stock DoorGoDown(ent) {
-	// hack: we need to use the function DoorGoDown
-	// let's make the entity on purpose
-	set_ent_data(ent, "CBaseToggle", "m_sMaster", 0);
-	set_pev(ent, pev_spawnflags, SF_DOOR_NO_AUTO_RETURN);
-	set_ent_data(ent, "CBaseToggle", "m_toggle_state", TS_AT_TOP);
-	dllfunc(DLLFunc_Use, ent, 0);
-
-	// hack finished, restore entity previous data
-	set_pev(ent, pev_spawnflags, pev(ent, Pev_SavedSpawnFlags));
-	set_ent_data(ent, "CBaseToggle", "m_sMaster", pev(ent, Pev_SavedMaster));
-	set_ent_data(ent, "CBaseToggle", "m_toggle_state", TS_AT_BOTTOM);
 }

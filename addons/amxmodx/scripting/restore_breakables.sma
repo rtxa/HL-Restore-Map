@@ -1,12 +1,11 @@
-#include <amxmisc>
 #include <amxmodx>
 #include <engine>
 #include <fakemeta>
-#include <fun>
 #include <hamsandwich>
+#include <restore_map_stocks>
 
 #define PLUGIN  "Restore Breakables"
-#define VERSION "0.1"
+#define VERSION "0.3"
 #define AUTHOR  "rtxA"
 
 #define DEBUG 1
@@ -25,10 +24,9 @@ enum {
 	matLastMaterial
 }
 
-// hay q guardar los datos iniciales de la ent para su posterior uso en su respawn
-#define Pev_SpawnHealth pev_fuser4
-#define Pev_SpawnTargetName pev_message
-#define Pev_SpawnTouchAdress pev_iuser4
+#define Pev_SpawnHealth 		pev_fuser4
+#define Pev_SpawnTargetName 	pev_message
+#define Pev_SpawnTouchAdress 	pev_iuser4
 
 public plugin_precache() {
 	RegisterHam(Ham_Spawn, "func_breakable", "OnBreakableSpawn_Post", true);
@@ -47,8 +45,7 @@ public plugin_init() {
 	RegisterHam(Ham_Killed, "func_pushable", "OnPushableKilled_Post", true);
 
 #if defined DEBUG
-	register_concmd("entid", "CmdEntId");
-	register_concmd("rentid", "CmdRestoreEntId");
+	register_concmd("breakables_restore", "CmdRestoreEntId");
 #endif
 }
 
@@ -58,48 +55,14 @@ public plugin_natives() {
 }
 
 #if defined DEBUG
-public CmdEntId(id)
-{
-	new ent;
-	if ((ent = read_argv_int(1)) < 1 || pev_valid(ent) < 2)
-	{
-		console_print(id, "Invalid entity: %d", ent);
-		return PLUGIN_HANDLED;
-	}
-
-	new szClassName[MAX_NAME_LENGTH], Float:flNextThink;
-	pev(ent, pev_classname, szClassName, charsmax(szClassName));
-	pev(ent, pev_nextthink, flNextThink);
-
-	console_print(id, "Ent: %i (%s) - SOLID_NOT: %i - NODRAW: %i - pev_impulse %d", ent, szClassName, pev(ent, pev_solid) == SOLID_NOT, pev(ent, pev_effects) == EF_NODRAW, pev(ent, pev_impulse));
-	console_print(id, "  m_pfnThink: 0x%x", get_ent_data(ent, "CBaseEntity", "m_pfnThink"));
-
-	return PLUGIN_HANDLED;
-}
 
 public CmdRestoreEntId(id) {
-	new ent = read_argv_int(1);
-
-	if (!ent) {
-		RestoreAllBreakables();
-		RestoreAllPushables();
-	} else {
-		if (pev_valid(ent) != 2) {
-			console_print(id, "Invalid entity: %d", ent);
-			return PLUGIN_HANDLED;
-		}
-
-		new classname[32];
-		pev(ent, pev_classname, classname, charsmax(classname));
-
-		if (equal(classname, "func_breakable"))
-			RestoreBreakable(ent);
-		else if (equal(classname, "func_pushable"))
-			RestorePushable(ent);
-	}
+	RestoreAllBreakables();
+	RestoreAllPushables();
 
 	return PLUGIN_HANDLED;
 }
+
 #endif
 
 public OnBreakableSpawn_Post(ent) {
@@ -132,13 +95,10 @@ public OnBreakableThink_Pre(ent) {
 	return HAM_SUPERCEDE;
 }
 
-// solo se llama cuando lo destruis con un arma, si lo destruye un boton
-// llama al die directamente, mejor confiar en el think
 public OnBreakableKilled_Post(ent) {
 	// remove kill flag, this is the reason why entity think doesn't work even when it should
 	// Block too UTIL_Remove from CBaseEntity::Killed()
 	set_pev(ent, pev_flags, pev(ent, pev_flags) & ~FL_KILLME);
-
 }
 
 RestoreBreakable(ent) {
@@ -225,7 +185,6 @@ public OnPushableSpawn_Post(ent) {
 }
 
 public OnPushableThink_Pre(ent) {
-
 	if (pev(ent, pev_spawnflags) & SF_PUSH_BREAKABLE) {
 		// Block CBreakable::Die() code that removes the entity
 		set_ent_data(ent, "CBaseEntity", "m_pfnThink", 0);
@@ -235,8 +194,6 @@ public OnPushableThink_Pre(ent) {
 	return HAM_SUPERCEDE;
 }
 
-// solo se llama cuando lo destruis con un arma, si lo destruye un boton
-// llama al die directamente
 public OnPushableKilled_Post(ent) {
 	// remove kill flag, this is the reason why entity think doesn't work even when it should
 	// Block too UTIL_Remove from CBaseEntity::Killed()
@@ -252,10 +209,6 @@ RestorePushable(ent) {
 
 	set_pev(ent, pev_movetype, MOVETYPE_PUSHSTEP);	
 	set_pev(ent, pev_solid, SOLID_BBOX);
-
-	//new model[256];
-	//pev(ent, pev_model, model, charsmax(model));
-	//entity_set_model(ent, model);
 	
 	if (pev(ent, pev_friction) > 399)
 		set_pev(ent, pev_friction, 399);
@@ -276,12 +229,6 @@ RestoreAllPushables() {
 	while ((ent = find_ent_by_class(ent, "func_pushable"))) {
 		RestorePushable(ent);
 	}
-}
-
-// thanks hamlet_eagle
-stock get_string_int(offset, const string[], const size) {
-	if (size != 0)
-		global_get(glb_pStringBase, offset, string, size);
 }
 
 public native_restore_breakables(plugin_id, argc) {

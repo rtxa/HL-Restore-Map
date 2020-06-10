@@ -1,13 +1,12 @@
-#include <amxmisc>
 #include <amxmodx>
 #include <engine>
 #include <fakemeta>
-#include <fun>
 #include <hamsandwich>
+#include <restore_map_stocks>
 #include <xs>
 
 #define PLUGIN  "Restore Brush Models"
-#define VERSION "0.1"
+#define VERSION "0.3"
 #define AUTHOR  "rtxA"
 
 #define DEBUG 1
@@ -30,7 +29,7 @@ public plugin_init() {
 	register_plugin(PLUGIN, VERSION, AUTHOR);
 
 #if defined DEBUG
-	register_concmd("bmodels_rentid", "CmdRestoreEntId");
+	register_concmd("bmodels_restore", "CmdRestoreEntId");
 #endif
 }
 
@@ -41,23 +40,8 @@ public plugin_natives() {
 
 #if defined DEBUG
 public CmdRestoreEntId(id) {
-	new ent = read_argv_int(1);
-
-	if (!ent) {
-		RestoreAllFuncRotating();
-		RestoreAllFuncWallToggle();
-	} else {
-		if (pev_valid(ent) != 2) {
-			console_print(id, "Invalid entity: %d", ent);
-			return PLUGIN_HANDLED;
-		}
-
-		new classname[32];
-		pev(ent, pev_classname, classname, charsmax(classname));
-
-		if (equal(classname, "func_rotating"))
-			RestoreFuncRotating(ent);
-	}
+	RestoreAllFuncRotating();
+	RestoreAllFuncWallToggle();
 
 	return PLUGIN_HANDLED;
 }
@@ -211,11 +195,4 @@ public native_restore_func_wall_toggle(plugin_id, argc) {
 	RestoreFuncWallToggle(ent);
 
 	return true;
-}
-
-// ======================== useful stocks ============================================
-
-stock get_string_int(offset, const string[], const size) {
-	if (size != 0)
-		global_get(glb_pStringBase, offset, string, size);
 }

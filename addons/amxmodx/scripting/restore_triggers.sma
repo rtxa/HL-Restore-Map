@@ -1,13 +1,12 @@
-#include <amxmisc>
 #include <amxmodx>
 #include <engine>
 #include <fakemeta>
-#include <fun>
 #include <hamsandwich>
+#include <restore_map_stocks>
 #include <xs>
 
 #define PLUGIN  "Restore Triggers"
-#define VERSION "0.1"
+#define VERSION "0.3"
 #define AUTHOR  "rtxA"
 
 #define DEBUG 1
@@ -24,7 +23,7 @@ public plugin_init() {
 	register_plugin(PLUGIN, VERSION, AUTHOR);
 
 #if defined DEBUG
-	register_concmd("triggers_rentid", "CmdRestoreEntId");
+	register_concmd("triggers_restore", "CmdRestoreEntId");
 #endif
 }
 
@@ -37,22 +36,9 @@ public plugin_natives() {
 
 #if defined DEBUG
 public CmdRestoreEntId(id) {
-	new ent = read_argv_int(1);
-
-	if (!ent) {
-		RestoreAllTriggerOnce();
-		RestoreAllMultiManager();
-		RestoreAllTriggerPush();
-	} else {
-		if (pev_valid(ent) != 2) {
-			console_print(id, "Invalid entity: %d", ent);
-			return PLUGIN_HANDLED;
-		}
-
-		new classname[32];
-		pev(ent, pev_classname, classname, charsmax(classname));
-
-	}
+	RestoreAllTriggerOnce();
+	RestoreAllMultiManager();
+	RestoreAllTriggerPush();
 
 	return PLUGIN_HANDLED;
 }

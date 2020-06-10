@@ -1,13 +1,12 @@
-#include <amxmisc>
 #include <amxmodx>
 #include <engine>
 #include <fakemeta>
-#include <fun>
 #include <hamsandwich>
+#include <restore_map_stocks>
 #include <xs>
 
 #define PLUGIN  "Restore Train"
-#define VERSION "0.1"
+#define VERSION "0.3"
 #define AUTHOR  "rtxA"
 
 #define DEBUG 1
@@ -26,7 +25,7 @@ public plugin_init() {
 	register_plugin(PLUGIN, VERSION, AUTHOR);
 
 #if defined DEBUG
-	register_concmd("train_rentid", "CmdRestoreEntId");
+	register_concmd("train_restore", "CmdRestoreEntId");
 #endif
 }
 
@@ -37,23 +36,8 @@ public plugin_natives() {
 
 #if defined DEBUG
 public CmdRestoreEntId(id) {
-	new ent = read_argv_int(1);
-
-	if (!ent) {
-		RestoreAllTrackTrain();
-		RestoreAllTrain();
-	} else {
-		if (pev_valid(ent) != 2) {
-			console_print(id, "Invalid entity: %d", ent);
-			return PLUGIN_HANDLED;
-		}
-
-		new classname[32];
-		pev(ent, pev_classname, classname, charsmax(classname));
-
-		if (equal(classname, "func_tracktrain"))
-			RestoreTrackTrain(ent);
-	}
+	RestoreAllTrackTrain();
+	RestoreAllTrain();
 
 	return PLUGIN_HANDLED;
 }
@@ -131,23 +115,6 @@ RestoreTrain(ent) {
 
 	set_ent_data(ent, "CFuncTrain", "m_activated", false);
 	ExecuteHam(Ham_Activate, ent);
-}
-
-SetMovedir(ent) {
-	new Float:angles[3];
-	pev(ent, pev_angles, angles);
-	if (xs_vec_equal(angles, Float:{0.0, -1.0, 0.0})) {
-		set_pev(ent, pev_movedir, Float:{0.0, 0.0, 1.0});
-	} else if (xs_vec_equal(angles, Float:{0.0, -2.0, 0.0})) {
-		set_pev(ent, pev_movedir, Float:{0.0, 0.0, -1.0});
-	} else {
-		engfunc(EngFunc_MakeVectors, angles);
-		set_pev(ent, pev_angles, angles);
-		new Float:v_forward[3];
-		global_get(glb_v_forward, v_forward);
-		set_pev(ent, pev_movedir, v_forward);
-	}
-	set_pev(ent, pev_angles, Float:{0.0, 0.0, 0.0});
 }
 
 RestoreAllTrain() {
@@ -240,9 +207,3 @@ public native_restore_tracktrain(plugin_id, argc) {
 	return true;
 }
 
-// ======================== useful stocks ============================================
-
-stock get_string_int(offset, const string[], const size) {
-	if (size != 0)
-		global_get(glb_pStringBase, offset, string, size);
-}

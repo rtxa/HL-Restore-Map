@@ -1,9 +1,8 @@
-#include <amxmisc>
 #include <amxmodx>
 #include <engine>
 #include <fakemeta>
-#include <fun>
 #include <hamsandwich>
+#include <restore_map_stocks>
 #include <xs>
 
 #define PLUGIN  "Restore Chargers"
@@ -24,7 +23,7 @@ public plugin_init() {
 	register_plugin(PLUGIN, VERSION, AUTHOR);
 
 #if defined DEBUG
-	register_concmd("chargers_rentid", "CmdRestoreEntId");
+	register_concmd("chargers_restore", "CmdRestoreEntId");
 #endif
 }
 
@@ -35,17 +34,8 @@ public plugin_natives() {
 
 #if defined DEBUG
 public CmdRestoreEntId(id) {
-	new ent = read_argv_int(1);
-
-	if (!ent) {
-		RestoreAllHealthChargers();
-		RestoreAllArmorChargers();
-	} else {
-		if (pev_valid(ent) != 2) {
-			console_print(id, "Invalid entity: %d", ent);
-			return PLUGIN_HANDLED;
-		}
-	}
+	RestoreAllHealthChargers();
+	RestoreAllArmorChargers();
 
 	return PLUGIN_HANDLED;
 }
@@ -129,20 +119,3 @@ public native_restore_armor_charger(plugin_id, argc) {
 	return true;
 }
 
-// ======================== useful stocks ============================================
-
-stock get_skill_cvar_string(const name[], output[], len) {
-	new skill = clamp(get_cvar_num("skill"), 1, 3);
-	get_cvar_string(fmt("%s%d", name, skill), output, len);
-}
-
-stock get_skill_cvar_num(const name[]) {
-	new value[32];
-	get_skill_cvar_string(name, value, charsmax(value));
-	return str_to_num(value);
-}
-
-stock get_string_int(offset, const string[], const size) {
-	if (size != 0)
-		global_get(glb_pStringBase, offset, string, size);
-}
