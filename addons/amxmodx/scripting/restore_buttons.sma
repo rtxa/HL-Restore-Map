@@ -31,8 +31,8 @@ public plugin_init() {
 }
 
 public plugin_natives() {
-	register_native("hl_restore_buttons", "native_restore_buttons");
-	register_native("hl_restore_rot_buttons", "native_restore_rot_buttons");
+	register_native("hl_restore_button", "native_restore_button");
+	register_native("hl_restore_rot_button", "native_restore_rot_button");
 }
 
 #if defined DEBUG
@@ -165,7 +165,7 @@ RotButtonResetPos(ent) {
 	set_pev(ent, pev_angles, angle1);
 }
 
-public native_restore_buttons(plugin_id, argc) {
+public native_restore_button(plugin_id, argc) {
 	if (argc < 2)
 		return false;
 
@@ -187,7 +187,7 @@ public native_restore_buttons(plugin_id, argc) {
 	return true;
 }
 
-public native_restore_rot_buttons(plugin_id, argc) {
+public native_restore_rot_button(plugin_id, argc) {
 	if (argc < 2)
 		return false;
 

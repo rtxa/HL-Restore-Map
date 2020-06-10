@@ -27,8 +27,8 @@ public plugin_init() {
 }
 
 public plugin_natives() {
-	register_native("hl_restore_doors", "native_restore_doors");
-	register_native("hl_restore_rot_doors", "native_restore_rot_doors");
+	register_native("hl_restore_door", "native_restore_door");
+	register_native("hl_restore_rot_door", "native_restore_rot_door");
 }
 
 #if defined DEBUG
@@ -155,7 +155,7 @@ RestoreAllRotDoors() {
 	}
 }
 
-public native_restore_doors(plugin_id, argc) {
+public native_restore_door(plugin_id, argc) {
 	if (argc < 2)
 		return false;
 
@@ -177,7 +177,7 @@ public native_restore_doors(plugin_id, argc) {
 	return true;
 }
 
-public native_restore_rot_doors(plugin_id, argc) {
+public native_restore_rot_door(plugin_id, argc) {
 	if (argc < 2)
 		return false;
 

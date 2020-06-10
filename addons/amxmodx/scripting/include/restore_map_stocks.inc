@@ -3,6 +3,7 @@
 #endif
 #define _restore_map_stocks_included
 
+#include <amxmodx>
 #include <fakemeta>
 
 stock get_string_int(offset, const string[], const size) {
