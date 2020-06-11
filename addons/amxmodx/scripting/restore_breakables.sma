@@ -218,6 +218,14 @@ RestorePushable(ent) {
 
 	set_pev(ent, pev_flags, pev(ent, pev_flags) | FL_FLOAT);
 	set_pev(ent, pev_friction, 0); // why is resetted? this doesn't makes sense
+	
+	// remove any velocity
+	set_pev(ent, pev_velocity, Float:{0.0, 0.0, 0.0}); 
+
+	// fix breakable not getting visible if it was destroyed by a func_train
+	new model[16]; // bsp models follows the next format: "*number"
+	pev(ent, pev_model, model, charsmax(model));
+	engfunc(EngFunc_SetModel, ent, model);
 
 	new Float:oldorigin[3];
 	pev(ent, pev_oldorigin, oldorigin);
