@@ -11,11 +11,9 @@
 
 #define DEBUG 1
 
-#define Pev_SavedMaster 		pev_message
-#define Pev_SavedToggleState 	pev_iuser2
-#define Pev_SavedSpawnFlags  	pev_iuser3
+#define Pev_SavedUseAdress 	    pev_iuser2
+#define Pev_SavedThinkAdress  	pev_iuser3
 #define Pev_SavedTouchAdress 	pev_iuser4
-#define Pev_SavedUseAdress 	    pev_iuser1
 
 public plugin_precache() {
 	RegisterHam(Ham_Spawn, "func_button", "OnButtonSpawn_Post", true);
@@ -91,7 +89,8 @@ public CmdRestoreEntId(id) {
 
 public OnButtonSpawn_Post(ent) {
 	set_pev(ent, Pev_SavedTouchAdress, get_ent_data(ent, "CBaseEntity", "m_pfnTouch"));	
-	set_pev(ent, Pev_SavedUseAdress, get_ent_data(ent, "CBaseEntity", "m_pfnUse"));	
+	set_pev(ent, Pev_SavedUseAdress, get_ent_data(ent, "CBaseEntity", "m_pfnUse"));
+	set_pev(ent, Pev_SavedThinkAdress, get_ent_data(ent, "CBaseEntity", "m_pfnThink"));
 }
 
 RestoreButton(ent) {
@@ -102,6 +101,11 @@ RestoreButton(ent) {
 	ButtonResetPos(ent);
 
 	set_pev(ent, pev_frame, 0.0);
+
+	if (pev(ent, pev_spawnflags) & SF_BUTTON_SPARK_IF_OFF) {
+		set_ent_data(ent, "CBaseEntity", "m_pfnThink", pev(ent, Pev_SavedThinkAdress));
+		set_pev(ent, pev_nextthink, get_gametime() + 0.5);
+	}
 
 	if (pev(ent, pev_spawnflags) & SF_BUTTON_TOUCH_ONLY) {
 		set_ent_data(ent, "CBaseEntity", "m_pfnTouch", pev(ent, Pev_SavedTouchAdress));
