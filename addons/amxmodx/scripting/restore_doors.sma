@@ -15,6 +15,7 @@
 public plugin_precache() {
 	RegisterHam(Ham_Spawn, "func_door", "OnDoorSpawn_Post", true);
 	RegisterHam(Ham_Spawn, "func_door_rotating", "OnRotDoorSpawn_Post", true);
+	RegisterHam(Ham_Spawn, "func_water", "OnDoorSpawn_Post", true); // it's just another door
 }
 
 public plugin_init() {
@@ -22,6 +23,7 @@ public plugin_init() {
 
 	hl_restore_register("func_door", "RestoreDoor");
 	hl_restore_register("func_door_rotating", "RestoreRotDoor");
+	hl_restore_register("func_water", "RestoreDoor"); // it's just another door
 }
 
 // ================= func_door ===========================
