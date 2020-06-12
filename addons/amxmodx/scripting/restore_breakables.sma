@@ -122,6 +122,11 @@ public RestoreBreakable(ent) {
 		set_pev(ent, pev_flags, pev(ent, pev_flags) | FL_WORLDBRUSH);
 	}
 
+	// fixes collision in some cases (dr_barbie_csbr)
+	new model[16];
+	pev(ent, pev_model, model, charsmax(model));
+	engfunc(EngFunc_SetModel, ent, model);
+
 	// remove entity spawned by the breakable by checking his owner
 	new ofsSpawnObject = get_ent_data(ent, "CBreakable", "m_iszSpawnObject");
 	if (ofsSpawnObject) {
