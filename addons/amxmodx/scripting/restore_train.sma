@@ -2,14 +2,13 @@
 #include <engine>
 #include <fakemeta>
 #include <hamsandwich>
+#include <restore_map>
 #include <restore_map_stocks>
 #include <xs>
 
 #define PLUGIN  "Restore Train"
-#define VERSION "0.3"
+#define VERSION "0.4"
 #define AUTHOR  "rtxA"
-
-#define DEBUG 1
 
 #define Pev_SavedThinkAdress 	pev_iuser4
 #define Pev_FirstTarget 		pev_iuser3
@@ -24,24 +23,9 @@ public plugin_precache() {
 public plugin_init() {
 	register_plugin(PLUGIN, VERSION, AUTHOR);
 
-#if defined DEBUG
-	register_concmd("train_restore", "CmdRestoreEntId");
-#endif
+	hl_restore_register("func_train", "RestoreTrain");
+	hl_restore_register("func_tracktrain", "RestoreTrackTrain");
 }
-
-public plugin_natives() {
-	register_native("hl_restore_train", "native_restore_train");
-	register_native("hl_restore_tracktrain", "native_restore_tracktrain");
-}
-
-#if defined DEBUG
-public CmdRestoreEntId(id) {
-	RestoreAllTrackTrain();
-	RestoreAllTrain();
-
-	return PLUGIN_HANDLED;
-}
-#endif
 
 // warning: do not try to get first target at ::Spawn(), there's a big chance
 // that the path_corner that is the first target hasn't spawned yet
@@ -66,7 +50,7 @@ public OnTrainActivate_Post(ent) {
 	}
 }
 
-RestoreTrain(ent) {
+public RestoreTrain(ent) {
 	new Float:speed;
 	pev(ent, pev_speed, speed)
 	if (speed == 0.0)
@@ -117,18 +101,11 @@ RestoreTrain(ent) {
 	ExecuteHam(Ham_Activate, ent);
 }
 
-RestoreAllTrain() {
-	new ent;
-	while ((ent = find_ent_by_class(ent, "func_train"))) {
-		RestoreTrain(ent);
-	}
-}
-
 public OnTrackTrainSpawn_Post(ent) {
 	set_pev(ent, Pev_SavedThinkAdress, get_ent_data(ent, "CBaseEntity", "m_pfnThink"));	
 }
 
-RestoreTrackTrain(ent) {	
+public RestoreTrackTrain(ent) {	
 	ResetPosTrackTrain(ent);
 
 	// return back entity think
@@ -155,55 +132,3 @@ ResetPosTrackTrain(ent) {
 	pev(ent, pev_oldorigin, oldorigin);
 	engfunc(EngFunc_SetOrigin, ent, oldorigin);
 }
-
-RestoreAllTrackTrain() {
-	new ent;
-	while ((ent = find_ent_by_class(ent, "func_tracktrain"))) {
-		RestoreTrackTrain(ent);
-	}
-}
-
-public native_restore_train(plugin_id, argc) {
-	if (argc < 2)
-		return false;
-
-	new ent = get_param(1);
-	new all = get_param(2);
-
-	if (all) {
-		RestoreAllTrain();
-		return true;
-	}
-
-	if (pev_valid(ent) != 2) {
-		log_amx("Invalid entity: %d", ent);
-		return false;
-	}
-
-	RestoreTrain(ent);
-
-	return true;
-}
-
-public native_restore_tracktrain(plugin_id, argc) {
-	if (argc < 2)
-		return false;
-
-	new ent = get_param(1);
-	new all = get_param(2);
-
-	if (all) {
-		RestoreAllTrackTrain();
-		return true;
-	}
-
-	if (pev_valid(ent) != 2) {
-		log_amx("Invalid entity: %d", ent);
-		return false;
-	}
-
-	RestoreTrackTrain(ent);
-
-	return true;
-}
-

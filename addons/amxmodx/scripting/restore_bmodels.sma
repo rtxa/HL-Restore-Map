@@ -2,14 +2,13 @@
 #include <engine>
 #include <fakemeta>
 #include <hamsandwich>
+#include <restore_map>
 #include <restore_map_stocks>
 #include <xs>
 
 #define PLUGIN  "Restore Brush Models"
-#define VERSION "0.3"
+#define VERSION "0.4"
 #define AUTHOR  "rtxA"
-
-#define DEBUG 1
 
 // missing in hlsdk_const.inc, a PR must be done...
 #define	SF_BRUSH_ACCDCC			16	// brush should accelerate and decelerate when toggled
@@ -28,24 +27,11 @@ public plugin_precache() {
 public plugin_init() {
 	register_plugin(PLUGIN, VERSION, AUTHOR);
 
-#if defined DEBUG
-	register_concmd("bmodels_restore", "CmdRestoreEntId");
-#endif
+	hl_restore_register("func_rotating", "RestoreFuncRotating");
+	hl_restore_register("func_wall_toggle", "RestoreFuncWallToggle");
 }
 
-public plugin_natives() {
-	register_native("hl_restore_func_rotating", "native_restore_func_rotating");
-	register_native("hl_restore_func_wall_toggle", "native_restore_func_wall_toggle");
-}
-
-#if defined DEBUG
-public CmdRestoreEntId(id) {
-	RestoreAllFuncRotating();
-	RestoreAllFuncWallToggle();
-
-	return PLUGIN_HANDLED;
-}
-#endif
+// ================= func_rotating ===========================
 
 public OnFuncRotatingSpawn_Post(ent) {
 	set_pev(ent, Pev_SavedThinkAdress, get_ent_data(ent, "CBaseEntity", "m_pfnThink"));	
@@ -57,7 +43,7 @@ public OnFuncRotatingSpawn_Post(ent) {
 	set_pev(ent, Pev_SavedAngle, angles);
 }
 
-RestoreFuncRotating(ent) {
+public RestoreFuncRotating(ent) {
 	new noiseRunning[128];
 	get_string_int(pev(ent, pev_noise3), noiseRunning, charsmax(noiseRunning));
 	
@@ -111,50 +97,14 @@ RestoreFuncRotating(ent) {
 	}
 }
 
-RestoreAllFuncRotating() {
-	new ent;
-	while ((ent = find_ent_by_class(ent, "func_rotating"))) {
-		RestoreFuncRotating(ent);
-	}
-}
-
-public native_restore_func_rotating(plugin_id, argc) {
-	if (argc < 2)
-		return false;
-
-	new ent = get_param(1);
-	new all = get_param(2);
-
-	if (all) {
-		RestoreAllFuncRotating();
-		return true;
-	}
-
-	if (pev_valid(ent) != 2) {
-		log_amx("Invalid entity: %d", ent);
-		return false;
-	}
-
-	RestoreFuncRotating(ent);
-
-	return true;
-}
-
 // ================= func_wall_toggle ===========================
 
-RestoreFuncWallToggle(ent) {
+public RestoreFuncWallToggle(ent) {
 	ExecuteHam(Ham_Spawn, ent);
 	if (pev(ent, pev_spawnflags) & SF_WALL_START_OFF)
 		TurnOffWallToggle(ent);
 	else
 		TurnOnWallToggle(ent);
-}
-
-RestoreAllFuncWallToggle() {
-	new ent;
-	while ((ent = find_ent_by_class(ent, "func_wall_toggle"))) {
-		RestoreFuncWallToggle(ent);
-	}
 }
 
 TurnOnWallToggle(ent) {
@@ -173,26 +123,4 @@ TurnOffWallToggle(ent) {
 	new Float:origin[3];
 	pev(ent, pev_origin, origin);	
 	engfunc(EngFunc_SetOrigin, ent, origin);
-}
-
-public native_restore_func_wall_toggle(plugin_id, argc) {
-	if (argc < 2)
-		return false;
-
-	new ent = get_param(1);
-	new all = get_param(2);
-
-	if (all) {
-		RestoreAllFuncWallToggle();
-		return true;
-	}
-
-	if (pev_valid(ent) != 2) {
-		log_amx("Invalid entity: %d", ent);
-		return false;
-	}
-
-	RestoreFuncWallToggle(ent);
-
-	return true;
 }

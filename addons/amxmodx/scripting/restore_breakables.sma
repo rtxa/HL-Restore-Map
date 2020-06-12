@@ -2,13 +2,12 @@
 #include <engine>
 #include <fakemeta>
 #include <hamsandwich>
+#include <restore_map>
 #include <restore_map_stocks>
 
 #define PLUGIN  "Restore Breakables"
-#define VERSION "0.3"
+#define VERSION "0.4"
 #define AUTHOR  "rtxA"
-
-#define DEBUG 1
 
 enum { 
 	matGlass = 0,
@@ -36,6 +35,9 @@ public plugin_precache() {
 public plugin_init() {
 	register_plugin(PLUGIN, VERSION, AUTHOR);
 
+	hl_restore_register("func_breakable", "RestoreBreakable");
+	hl_restore_register("func_pushable", "RestorePushable");
+
 	// breakable
 	RegisterHam(Ham_Think, "func_breakable", "OnBreakableThink_Pre");
 	RegisterHam(Ham_Killed, "func_breakable", "OnBreakableKilled_Post", true);
@@ -43,27 +45,7 @@ public plugin_init() {
 	// pushable
 	RegisterHam(Ham_Think, "func_pushable", "OnPushableThink_Pre");
 	RegisterHam(Ham_Killed, "func_pushable", "OnPushableKilled_Post", true);
-
-#if defined DEBUG
-	register_concmd("breakables_restore", "CmdRestoreEntId");
-#endif
 }
-
-public plugin_natives() {
-	register_native("hl_restore_breakable", "native_restore_breakable");
-	register_native("hl_restore_pushable", "native_restore_pushable");
-}
-
-#if defined DEBUG
-
-public CmdRestoreEntId(id) {
-	RestoreAllBreakables();
-	RestoreAllPushables();
-
-	return PLUGIN_HANDLED;
-}
-
-#endif
 
 public OnBreakableSpawn_Post(ent) {
 	SaveDataBreakable(ent);
@@ -101,7 +83,7 @@ public OnBreakableKilled_Post(ent) {
 	set_pev(ent, pev_flags, pev(ent, pev_flags) & ~FL_KILLME);
 }
 
-RestoreBreakable(ent) {
+public RestoreBreakable(ent) {
 	set_pev(ent, pev_effects, pev(ent, pev_effects) & ~EF_NODRAW);
 	set_pev(ent, pev_solid, SOLID_BSP);
 	set_pev(ent, pev_movetype, MOVETYPE_PUSH);
@@ -156,15 +138,6 @@ RestoreBreakable(ent) {
 	}
 }
 
-RestoreAllBreakables() {
-	new ent;
-	while ((ent = find_ent_by_class(ent, "func_breakable"))) {
-		if (pev(ent, pev_effects) & EF_NODRAW) {
-			RestoreBreakable(ent);
-		}
-	}
-}
-
 BreakableDestroy(ent) {
 	set_pev(ent, pev_effects, pev(ent, pev_effects) | EF_NODRAW);
 }
@@ -202,7 +175,7 @@ public OnPushableKilled_Post(ent) {
 	}
 }
 
-RestorePushable(ent) {
+public RestorePushable(ent) {
 	if (pev(ent, pev_spawnflags) & SF_PUSH_BREAKABLE) {
 		RestoreBreakable(ent);
 	}
@@ -230,55 +203,4 @@ RestorePushable(ent) {
 	new Float:oldorigin[3];
 	pev(ent, pev_oldorigin, oldorigin);
 	engfunc(EngFunc_SetOrigin, ent, oldorigin); // warning: don't use set_pev(), doesn't work right...
-}
-
-RestoreAllPushables() {
-	new ent;
-	while ((ent = find_ent_by_class(ent, "func_pushable"))) {
-		RestorePushable(ent);
-	}
-}
-
-public native_restore_breakable(plugin_id, argc) {
-	if (argc < 2)
-		return false;
-
-	new ent = get_param(1);
-	new all = get_param(2);
-
-	if (all) {
-		RestoreAllBreakables();
-		return true;
-	}
-
-	if (pev_valid(ent) != 2) {
-		log_amx("Invalid entity: %d", ent);
-		return false;
-	}
-
-	RestoreBreakable(ent);
-
-	return true;
-}
-
-public native_restore_pushable(plugin_id, argc) {
-	if (argc < 2)
-		return false;
-
-	new ent = get_param(1);
-	new all = get_param(2);
-
-	if (all) {
-		RestoreAllPushables();
-		return true;
-	}
-
-	if (pev_valid(ent) != 2) {
-		log_amx("Invalid entity: %d", ent);
-		return false;
-	}
-
-	RestorePushable(ent);
-
-	return true;
 }
