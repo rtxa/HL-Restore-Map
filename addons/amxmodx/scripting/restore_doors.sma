@@ -24,6 +24,8 @@ public plugin_init() {
 	hl_restore_register("func_door_rotating", "RestoreRotDoor");
 }
 
+// ================= func_door ===========================
+
 public OnDoorSpawn_Post(ent) {
 	set_pev(ent, Pev_SavedTouchAdress, get_ent_data(ent, "CBaseEntity", "m_pfnTouch"));	
 }
@@ -52,6 +54,8 @@ DoorResetPos(ent) {
 	get_ent_data_vector(ent, "CBaseToggle", "m_vecPosition1", pos1);
 	engfunc(EngFunc_SetOrigin, ent, pos1);
 }
+
+// ================= func_door_rotating ===========================
 
 public OnRotDoorSpawn_Post(ent) {
 	set_pev(ent, Pev_SavedTouchAdress, get_ent_data(ent, "CBaseEntity", "m_pfnTouch"));	

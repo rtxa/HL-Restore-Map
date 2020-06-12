@@ -47,6 +47,8 @@ public plugin_init() {
 	RegisterHam(Ham_Killed, "func_pushable", "OnPushableKilled_Post", true);
 }
 
+// ================= func_breakable ===========================
+
 public OnBreakableSpawn_Post(ent) {
 	SaveDataBreakable(ent);
 }
@@ -150,6 +152,8 @@ BreakableDestroy(ent) {
 IsBreakable(ent) {
 	return get_ent_data(ent, "CBreakable", "m_Material") != matUnbreakableGlass;
 }
+
+// ================= func_pushable ===========================
 
 public OnPushableSpawn_Post(ent) {
 	if (pev(ent, pev_spawnflags) & SF_PUSH_BREAKABLE) {

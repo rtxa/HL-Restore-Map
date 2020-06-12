@@ -27,6 +27,8 @@ public plugin_init() {
 	hl_restore_register("func_tracktrain", "RestoreTrackTrain");
 }
 
+// ================= func_train ===========================
+
 // warning: do not try to get first target at ::Spawn(), there's a big chance
 // that the path_corner that is the first target hasn't spawned yet
 public OnTrainActivate_Pre(ent) {
@@ -100,6 +102,8 @@ public RestoreTrain(ent) {
 	set_ent_data(ent, "CFuncTrain", "m_activated", false);
 	ExecuteHam(Ham_Activate, ent);
 }
+
+// ================= func_tracktrain ===========================
 
 public OnTrackTrainSpawn_Post(ent) {
 	set_pev(ent, Pev_SavedThinkAdress, get_ent_data(ent, "CBaseEntity", "m_pfnThink"));	

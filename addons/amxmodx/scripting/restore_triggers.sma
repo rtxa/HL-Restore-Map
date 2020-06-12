@@ -29,6 +29,8 @@ public plugin_init() {
 	hl_restore_register("trigger_hurt", "RestoreTriggerHurt");
 }
 
+// ================= trigger_once ===========================
+
 public OnTriggerOnceSpawn_Post(ent) {
     // set to -2.0, this way we can make sure the entity isn't deleted
     set_ent_data_float(ent, "CBaseToggle", "m_flWait", -2.0)
@@ -48,6 +50,8 @@ public RestoreTriggerOnce(ent) {
     dllfunc(DLLFunc_Spawn, ent);
 }
 
+// ================= trigger_push ===========================
+
 public RestoreTriggerPush(ent) {
 	// is it required to restore movedir? no idea but regamedll does this for a reason
 	new Float:movedir[3];
@@ -55,6 +59,8 @@ public RestoreTriggerPush(ent) {
 	ExecuteHam(Ham_Spawn, ent);
 	set_pev(ent, pev_movedir, movedir);
 }
+
+// ================= trigger_hurt ===========================
 
 public RestoreTriggerHurt(ent) {
 	new Float:mins[3], Float:maxs[3];
@@ -68,9 +74,13 @@ public RestoreTriggerHurt(ent) {
 	engfunc(EngFunc_SetSize, ent, mins, maxs);
 }
 
+// ================= trigger_auto ===========================
+
 public RestoreTriggerAuto(ent) {
 	set_pev(ent, pev_nextthink, get_gametime() + 0.1);
 }
+
+// ================= multi_manager ===========================
 
 public OnMultiManagerSpawn_Post(ent) {
 	set_pev(ent, Pev_SavedUseAdress, get_ent_data(ent, "CBaseEntity", "m_pfnUse"));

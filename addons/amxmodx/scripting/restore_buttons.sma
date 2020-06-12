@@ -26,6 +26,8 @@ public plugin_init() {
 	hl_restore_register("func_rot_button", "RestoreRotButton")
 }
 
+// ================= func_button ===========================
+
 public OnButtonSpawn_Post(ent) {
 	set_pev(ent, Pev_SavedTouchAdress, get_ent_data(ent, "CBaseEntity", "m_pfnTouch"));	
 	set_pev(ent, Pev_SavedUseAdress, get_ent_data(ent, "CBaseEntity", "m_pfnUse"));
@@ -65,6 +67,8 @@ ButtonResetPos(ent) {
 	get_ent_data_vector(ent, "CBaseToggle", "m_vecPosition1", pos1);
 	engfunc(EngFunc_SetOrigin, ent, pos1);
 }
+
+// ================= func_rot_button ===========================
 
 public OnRotButtonSpawn_Post(ent) {
 	set_pev(ent, Pev_SavedTouchAdress, get_ent_data(ent, "CBaseEntity", "m_pfnTouch"));	

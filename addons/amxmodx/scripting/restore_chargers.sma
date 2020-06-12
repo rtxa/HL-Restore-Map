@@ -24,9 +24,19 @@ public plugin_init() {
 	hl_restore_register("func_recharge", "RestoreArmorCharger");
 }
 
+// ================= func_healthcharger ===========================
+
 public OnHealthChargerSpawn_Post(ent) {
 	g_HealthChargerCapacity = get_ent_data(ent, "CWallHealth", "m_iJuice");
 }
+
+public RestoreHealthCharger(ent) {
+	set_ent_data(ent, "CWallHealth", "m_iJuice", g_HealthChargerCapacity);
+	set_pev(ent, pev_frame, 0);
+	set_pev(ent, pev_nextthink, 0);
+}
+
+// ================= func_recharge ===========================
 
 public OnArmorChargerSpawn_Post(ent) {
 	g_ArmorChargerCapacity = get_ent_data(ent, "CRecharge", "m_iJuice");
@@ -34,12 +44,6 @@ public OnArmorChargerSpawn_Post(ent) {
 
 public RestoreArmorCharger(ent) {
 	set_ent_data(ent, "CRecharge", "m_iJuice", g_ArmorChargerCapacity);
-	set_pev(ent, pev_frame, 0);
-	set_pev(ent, pev_nextthink, 0);
-}
-
-public RestoreHealthCharger(ent) {
-	set_ent_data(ent, "CWallHealth", "m_iJuice", g_HealthChargerCapacity);
 	set_pev(ent, pev_frame, 0);
 	set_pev(ent, pev_nextthink, 0);
 }
