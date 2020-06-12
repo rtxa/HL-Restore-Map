@@ -25,6 +25,7 @@ public plugin_init() {
 	hl_restore_register("trigger_auto", "RestoreTriggerAuto");
 	hl_restore_register("trigger_once", "RestoreTriggerOnce");
 	hl_restore_register("trigger_push", "RestoreTriggerPush");
+	hl_restore_register("trigger_hurt", "RestoreTriggerHurt");
 }
 
 public OnTriggerOnceSpawn_Post(ent) {
@@ -52,6 +53,18 @@ public RestoreTriggerPush(ent) {
 	pev(ent, pev_movedir, movedir);
 	ExecuteHam(Ham_Spawn, ent);
 	set_pev(ent, pev_movedir, movedir);
+}
+
+public RestoreTriggerHurt(ent) {
+	new Float:mins[3], Float:maxs[3];
+
+	pev(ent, pev_mins, mins);
+	pev(ent, pev_maxs, maxs);
+
+	// InitTrigger() is about to destroy the size
+	ExecuteHam(Ham_Spawn, ent);
+
+	engfunc(EngFunc_SetSize, ent, mins, maxs);
 }
 
 public RestoreTriggerAuto(ent) {
