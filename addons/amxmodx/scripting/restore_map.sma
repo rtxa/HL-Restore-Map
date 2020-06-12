@@ -13,6 +13,7 @@
 new Trie:g_TrieRestoreFw;
 
 public plugin_natives() {
+	g_TrieRestoreFw = TrieCreate();
 	register_native("hl_restore_register", "native_restore_register");
 	register_native("hl_restore_ent", "native_restore_ent");
 	register_native("hl_restore_by_class", "native_restore_by_class");
@@ -21,9 +22,7 @@ public plugin_natives() {
 
 public plugin_init() {
 	register_plugin(PLUGIN, VERSION, AUTHOR);
-
-	g_TrieRestoreFw = TrieCreate();
-
+	
 	// debug cmds
 	register_concmd("restore_all", "CmdRestoreAll", ADMIN_IMMUNITY);
 	register_concmd("restore_by_class", "CmdRestoreByClass", ADMIN_IMMUNITY);
