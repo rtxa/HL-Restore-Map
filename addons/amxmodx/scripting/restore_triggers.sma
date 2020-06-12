@@ -22,6 +22,7 @@ public plugin_init() {
 	register_plugin(PLUGIN, VERSION, AUTHOR);
 
 	hl_restore_register("multi_manager", "RestoreMultiManager");
+	hl_restore_register("multisource", "RestoreMultiSource");
 	hl_restore_register("trigger_auto", "RestoreTriggerAuto");
 	hl_restore_register("trigger_once", "RestoreTriggerOnce");
 	hl_restore_register("trigger_push", "RestoreTriggerPush");
@@ -88,4 +89,14 @@ public RestoreMultiManager(ent) {
 
 IsClone(ent) {
 	return pev(ent, pev_spawnflags) & SF_MULTIMAN_CLONE ? true : false;
+}
+
+// ================= multisource ===========================
+
+public RestoreMultiSource(ent) {
+	new size = get_ent_data_size("CMultiSource", "m_rgTriggered");
+	for (new i; i < size; i++) {
+		set_ent_data(ent, "CMultiSource", "m_rgTriggered", 0, i);
+	}
+	ExecuteHam(Ham_Spawn, ent);
 }
