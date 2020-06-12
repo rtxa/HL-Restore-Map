@@ -126,6 +126,9 @@ public native_restore_register(plugin_id, argc) {
 	if (TrieSetCell(g_TrieRestoreFw, classname, handler))
 		return true;
 
+	// if the forward can't be stored in the trie, destroy it
+	DestroyForward(handler);
+
 	return false;
 }
 
