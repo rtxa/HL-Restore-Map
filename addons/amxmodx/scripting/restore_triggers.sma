@@ -13,9 +13,16 @@
 #define Pev_SavedUseAdress pev_iuser4
 
 public plugin_precache() {
+	// multi_manager
 	RegisterHam(Ham_Spawn, "multi_manager", "OnMultiManagerSpawn_Post", true);
+
+	// trigger_once
 	RegisterHam(Ham_Spawn, "trigger_once", "OnTriggerOnceSpawn_Post", true);
 	RegisterHam(Ham_Think, "trigger_once", "OnTriggerOnceThink_Pre");
+
+	// trigger_multiple
+	RegisterHam(Ham_Spawn, "trigger_multiple", "OnTriggerMultipleSpawn_Post", true);
+	RegisterHam(Ham_Think, "trigger_multiple", "OnTriggerMultipleThink_Pre");
 }
 
 public plugin_init() {
@@ -27,6 +34,31 @@ public plugin_init() {
 	hl_restore_register("trigger_once", "RestoreTriggerOnce");
 	hl_restore_register("trigger_push", "RestoreTriggerPush");
 	hl_restore_register("trigger_hurt", "RestoreTriggerHurt");
+	hl_restore_register("trigger_multiple", "RestoreTriggerMultiple");
+}
+
+// ================= trigger_multiple ===========================
+
+// note: i didn't feel the need to restore this but map
+// deathrun_barbie_csbr uses a trigger_multiple in a unexpected way
+// it sets the wait time to less than 0, acting like a trigger_once
+// so it needs to get restored too
+public OnTriggerMultipleSpawn_Post(ent) {
+	if (get_ent_data_float(ent, "CBaseToggle", "m_flWait") <= 0)
+		set_ent_data_float(ent, "CBaseToggle", "m_flWait", -2.0)
+}
+
+public OnTriggerMultipleThink_Pre(ent) {
+	if (get_ent_data_float(ent, "CBaseToggle", "m_flWait") == -2.0) {
+		set_ent_data(ent, "CBaseEntity", "m_pfnThink", 0);
+		return HAM_SUPERCEDE;
+	}
+	return HAM_IGNORED;
+}
+
+public RestoreTriggerMultiple(ent) {
+	set_ent_data_float(ent, "CBaseToggle", "m_flWait", -2.0)
+	dllfunc(DLLFunc_Spawn, ent);
 }
 
 // ================= trigger_once ===========================
