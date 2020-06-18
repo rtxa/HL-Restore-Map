@@ -26,8 +26,6 @@ public plugin_init() {
 
 // ================= ambient_generic ===========================
 
-// note: only restore sounds that require to be toggled
-// restoring sound that play from the beggining of the map requires more work
 public RestoreAmbientGeneric(ent) {
 	new soundFile[128];
 	pev(ent, pev_message, soundFile, charsmax(soundFile));
@@ -35,9 +33,25 @@ public RestoreAmbientGeneric(ent) {
 	new Float:origin[3];
 	pev(ent, pev_origin, origin);
 
+	// silent sound
 	if ((pev(ent, pev_spawnflags) & AMBIENT_SOUND_START_SILENT)) {
-		// stop ambient sound
+		// stop ambient sound and restore
 		engfunc(EngFunc_EmitAmbientSound, ent, origin, soundFile, 0, 0, SND_STOP, 0);
 		ExecuteHamB(Ham_Spawn, ent);
+	} else {
+		// make think sound is silent before spawn to avoid emit sound with SND_SPAWNING flag
+		set_pev(ent, pev_spawnflags, pev(ent, pev_spawnflags) | AMBIENT_SOUND_START_SILENT);
+
+		// stop ambient sound
+		engfunc(EngFunc_EmitAmbientSound, ent, origin, soundFile, 0, 0, SND_STOP, 0);
+
+		// restore and force play sound
+		ExecuteHamB(Ham_Spawn, ent);
+		ExecuteHamB(Ham_Use, ent, 0, 0, USE_TOGGLE, 0.0);
+
+		// set back to his previous flag
+		set_pev(ent, pev_spawnflags, pev(ent, pev_spawnflags) & ~AMBIENT_SOUND_START_SILENT);
 	}
+
+
 }
