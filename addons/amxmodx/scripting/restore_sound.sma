@@ -9,6 +9,15 @@
 #define VERSION "0.4"
 #define AUTHOR  "rtxA"
 
+// missing in hlsdk_const.inc
+#define AMBIENT_SOUND_STATIC			0	// medium radius attenuation
+#define AMBIENT_SOUND_EVERYWHERE		1
+#define AMBIENT_SOUND_SMALLRADIUS		2
+#define AMBIENT_SOUND_MEDIUMRADIUS		4
+#define AMBIENT_SOUND_LARGERADIUS		8
+#define AMBIENT_SOUND_START_SILENT		16
+#define AMBIENT_SOUND_NOT_LOOPING		32
+
 public plugin_init() {
 	register_plugin(PLUGIN, VERSION, AUTHOR);
 
@@ -17,6 +26,8 @@ public plugin_init() {
 
 // ================= ambient_generic ===========================
 
+// note: only restore sounds that require to be toggled
+// restoring sound that play from the beggining of the map requires more work
 public RestoreAmbientGeneric(ent) {
 	new soundFile[128];
 	pev(ent, pev_message, soundFile, charsmax(soundFile));
@@ -24,8 +35,9 @@ public RestoreAmbientGeneric(ent) {
 	new Float:origin[3];
 	pev(ent, pev_origin, origin);
 
-	// stop ambient sound
-	engfunc(EngFunc_EmitAmbientSound, ent, origin, soundFile, 0, 0, SND_STOP, 0);
-
-	ExecuteHamB(Ham_Spawn, ent);
+	if ((pev(ent, pev_spawnflags) & AMBIENT_SOUND_START_SILENT)) {
+		// stop ambient sound
+		engfunc(EngFunc_EmitAmbientSound, ent, origin, soundFile, 0, 0, SND_STOP, 0);
+		ExecuteHamB(Ham_Spawn, ent);
+	}
 }
