@@ -7,7 +7,7 @@
 #include <xs>
 
 #define PLUGIN  "Restore Buttons"
-#define VERSION "0.4"
+#define VERSION "0.5"
 #define AUTHOR  "rtxA"
 
 #define Pev_SavedUseAdress 	    pev_iuser2

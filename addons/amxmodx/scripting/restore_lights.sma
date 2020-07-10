@@ -6,7 +6,7 @@
 #include <restore_map_stocks>
 
 #define PLUGIN  "Restore Lights"
-#define VERSION "0.4"
+#define VERSION "0.5"
 #define AUTHOR  "rtxA"
 
 #define Pev_StartedOff pev_iuser4

@@ -6,7 +6,7 @@
 #include <restore_map_stocks>
 
 #define PLUGIN  "Restore Environment"
-#define VERSION "0.4"
+#define VERSION "0.5"
 #define AUTHOR  "rtxA"
 
 new g_SprModelIndexSmoke;
