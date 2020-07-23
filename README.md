@@ -96,7 +96,7 @@ Now you are __ready__ to use the natives of the API.
 
 ## ☉ Preview
 
-[youtube]iblUy8oeQus[/youtube]
+www.youtube.com/watch?v=iblUy8oeQus
 
 ## ☘ Plugins using this API:
 
