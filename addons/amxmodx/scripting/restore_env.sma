@@ -6,12 +6,13 @@
 #include <restore_map_stocks>
 
 #define PLUGIN  "Restore Environment"
-#define VERSION "0.5"
+#define VERSION "0.6"
 #define AUTHOR  "rtxA"
 
 new g_SprModelIndexSmoke;
 
-#define Pev_Triggered pev_iuser4
+#define Pev_Triggered 	pev_iuser4
+#define Pev_SavedThink 	pev_iuser3
 
 new Trie:g_RenderGroups;
 
@@ -26,6 +27,9 @@ public plugin_precache() {
 	g_RenderGroups = TrieCreate();
 	RegisterHam(Ham_Use, "env_render", "OnEnvRenderUse_Pre");
 	register_forward(FM_OnFreeEntPrivateData, "OnFreeEntPrivateData_Pre");
+
+	// env_beam
+	RegisterHam(Ham_Spawn, "env_beam", "OnBeamSpawn_Post", true);
 }
 
 public plugin_init() {
@@ -33,6 +37,8 @@ public plugin_init() {
 
 	hl_restore_register("env_explosion", "RestoreEnvExplosion");
 	hl_restore_register("env_render", "RestoreEnvRender");
+	hl_restore_register("env_laser", "RestoreEnvLaser");
+	hl_restore_register("env_beam", "CLightning_Restore");
 }
 
 public plugin_end() {
@@ -168,6 +174,119 @@ public OnEnvExplosionThink_Pre(ent) {
 	}
 
 	return HAM_IGNORED;
+}
+
+// =================================== env_laser ==================================
+
+public RestoreEnvLaser(ent) {
+	// Remove model & collisions
+	set_pev(ent, pev_solid, SOLID_NOT);
+	set_pev(ent, pev_flags, pev(ent, pev_flags) | FL_CUSTOMENTITY);
+
+	//if (m_pSprite) {
+	//	m_pSprite->SetTransparency(kRenderGlow, pev->rendercolor.x, pev->rendercolor.y, pev->rendercolor.z, pev->renderamt, pev->renderfx);
+	//}
+
+	new target[32];
+	pev(ent, pev_targetname, target, charsmax(target));
+	if (target[0] && !(pev(ent, pev_spawnflags) & SF_BEAM_STARTON))
+		CLaser_TurnOff(ent);
+	else
+		CLaser_TurnOn(ent);
+}
+
+CLaser_TurnOff(ent) {
+	set_pev(ent, pev_effects, pev(ent, pev_effects) | EF_NODRAW);
+	set_pev(ent, pev_nextthink, 0.0);
+
+	new pSprite = get_ent_data_entity(ent, "CLaser", "m_pSprite");
+
+	if (pSprite != FM_NULLENT)
+		SpriteTurnOff(pSprite);
+}
+
+CLaser_TurnOn(ent) {
+	set_pev(ent, pev_effects, pev(ent, pev_effects) & ~EF_NODRAW);
+
+	new pSprite = get_ent_data_entity(ent, "CLaser", "m_pSprite");
+	
+	if (pSprite != FM_NULLENT)
+		SpriteTurnOn(pSprite);
+
+	set_pev(ent, pev_dmgtime, get_gametime());
+	set_pev(ent, pev_nextthink, get_gametime());
+}
+
+SpriteTurnOff(ent) {
+	set_pev(ent, pev_effects, EF_NODRAW);
+	set_pev(ent, pev_nextthink, 0.0);
+}
+
+SpriteTurnOn(ent) {
+	set_pev(ent, pev_effects, 0);
+
+	if ((entity_get_float(ent, EV_FL_framerate) && get_ent_data(ent, "CSprite", "m_maxFrame") > 1) || (pev(ent, pev_spawnflags) & SF_SPRITE_ONCE)) {	
+		// quizas no lo necesite por ahora, ya q si empezo on, ya se activo el think, no hay  encesidad de agregar eso...
+		//SetThink(&CSprite::AnimateThink);
+		set_pev(ent, pev_nextthink, get_gametime());
+		set_ent_data_float(ent, "CSprite", "m_lastTime", get_gametime());
+	}
+
+	set_pev(ent, pev_frame, 0.0);
+}
+
+// =================================== env_beam and env_lightning ===============================================
+
+public OnBeamSpawn_Post(ent) {
+	set_pev(ent, Pev_SavedThink, get_ent_data(ent, "CBaseEntity", "m_pfnThink"));
+}
+
+public CLightning_Restore(ent) {
+	// Remove model & collisions
+	set_pev(ent, pev_solid, SOLID_NOT);
+	set_pev(ent, pev_dmgtime, get_gametime());
+
+	if (CLightning_ServerSide(ent)) {
+		//SetThink(nullptr);
+		if (entity_get_float(ent, EV_FL_dmg) > 0) {
+			//SetThink(&CLightning::DamageThink);
+			set_pev(ent, pev_nextthink, get_gametime() + 0.1);
+		}
+
+		if (pev(ent, pev_targetname)) {
+			if (!(pev(ent, pev_spawnflags) & SF_BEAM_STARTON)) {
+				set_ent_data(ent, "CLightning", "m_active", false);
+				set_pev(ent, pev_effects, pev(ent, pev_effects) | EF_NODRAW);
+				set_pev(ent, pev_nextthink, 0.0);
+			} else {
+				set_ent_data(ent, "CLightning", "m_active", true);
+			}
+
+			//SetUse(&CLightning::ToggleUse);
+		}
+	} else {
+		set_ent_data(ent, "CLightning", "m_active", false);
+		
+		new target[32];
+		pev(ent, pev_targetname, target, charsmax(target));
+		
+		if (target[0]) {
+			//SetUse(&CLightning::StrikeUse);
+		}
+
+		if (!target[0] || (pev(ent, pev_spawnflags) & SF_BEAM_STARTON)) {
+			//SetThink(&CLightning::StrikeThink);
+			set_pev(ent, pev_nextthink, get_gametime() + 1.0);
+		}
+	}
+
+	set_ent_data(ent, "CBaseEntity", "m_pfnThink", pev(ent, Pev_SavedThink));
+}
+
+bool:CLightning_ServerSide(ent) {
+	if (!get_ent_data_float(ent, "CLightning", "m_life") && !(pev(ent, pev_spawnflags) & SF_BEAM_RING))
+		return true;
+	return false;
 }
 
 // ================= useful stocks for env_render ===========================
