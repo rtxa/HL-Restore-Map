@@ -6,7 +6,7 @@
 #include <restore_map_stocks>
 
 #define PLUGIN  "Restore Sound"
-#define VERSION "0.5"
+#define VERSION "0.6"
 #define AUTHOR  "rtxA"
 
 // missing in hlsdk_const.inc

@@ -7,7 +7,7 @@
 #include <xs>
 
 #define PLUGIN  "Restore Brush Models"
-#define VERSION "0.5"
+#define VERSION "0.6"
 #define AUTHOR  "rtxA"
 
 // missing in hlsdk_const.inc, a PR must be done...

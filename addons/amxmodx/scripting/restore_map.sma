@@ -6,7 +6,7 @@
 #include <restore_map>
 
 #define PLUGIN  "Restore Map"
-#define VERSION "0.5"
+#define VERSION "0.6"
 #define AUTHOR  "rtxA"
 
 // the trie stores classnames with the corresponding forward for restoring

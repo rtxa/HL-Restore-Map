@@ -7,7 +7,7 @@
 #include <xs>
 
 #define PLUGIN  "Restore Doors"
-#define VERSION "0.5"
+#define VERSION "0.6"
 #define AUTHOR  "rtxA"
 
 #define Pev_SavedTouchAdress 	pev_iuser4

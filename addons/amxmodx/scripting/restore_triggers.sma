@@ -7,7 +7,7 @@
 #include <xs>
 
 #define PLUGIN  "Restore Triggers"
-#define VERSION "0.5"
+#define VERSION "0.6"
 #define AUTHOR  "rtxA"
 
 #define Pev_SavedUseAdress pev_iuser4
