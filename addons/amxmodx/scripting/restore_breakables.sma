@@ -104,7 +104,11 @@ public RestoreBreakable(ent) {
 	// restore targetname
 	new targetname[32];
 	pev(ent, Pev_SpawnTargetName, targetname, charsmax(targetname));
-	set_pev(ent, pev_targetname, targetname);
+
+	// bugfix: targetname doesn't like to be set to an empty string of my own
+	// it ends up bugging info_player_deathmatch in some deathrun maps
+	if (targetname[0])
+		set_pev(ent, pev_targetname, targetname);
 
 	// restore angles
 	new Float:angles[3];
