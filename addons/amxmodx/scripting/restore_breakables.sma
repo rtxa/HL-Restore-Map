@@ -71,12 +71,14 @@ SaveDataBreakable(ent) {
 }
 
 public OnBreakableThink_Pre(ent) {
-	// Block CBreakable::Die() code that removes the entity
-	set_ent_data(ent, "CBaseEntity", "m_pfnThink", 0);
+	if (pev(ent, pev_solid) == SOLID_NOT) { // CBreakable::Die() has been executed
+		// block SUB_Remove Think
+		set_ent_data(ent, "CBaseEntity", "m_pfnThink", 0);
+		BreakableDestroy(ent);
+		return HAM_SUPERCEDE;
+	}
 
-	BreakableDestroy(ent);
-
-	return HAM_SUPERCEDE;
+	return HAM_IGNORED;
 }
 
 public OnBreakableKilled_Post(ent) {
