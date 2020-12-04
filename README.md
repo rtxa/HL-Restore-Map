@@ -1,6 +1,6 @@
 # HL Restore Map API
 
-![Author](https://img.shields.io/badge/Author-rtxA-red) ![Version](https://img.shields.io/badge/Version-0.5-red) ![Last Update](https://img.shields.io/badge/Last%20Update-20/06/2020-red) [![Source Code](https://img.shields.io/badge/GitHub-Source%20Code-blueviolet)](https://github.com/rtxa/HL-Restore-Map)
+![Author](https://img.shields.io/badge/Author-rtxA-red) ![Version](https://img.shields.io/badge/Version-0.6-red) ![Last Update](https://img.shields.io/badge/Last%20Update-04/12/2020-red) [![Source Code](https://img.shields.io/badge/GitHub-Source%20Code-blueviolet)](https://github.com/rtxa/HL-Restore-Map)
 
 ## ☉ Description
 
@@ -38,6 +38,8 @@ native hl_restore_all();
 - ambient_generic
 - env_explosion
 - env_render
+- env_laser
+- env_beam
 - func_breakable
 - func_pushable
 - func_door
@@ -86,22 +88,22 @@ Now you are __ready__ to use the natives of the API.
 
 - ☑ Add restoring of ambient_generic.
 - ☑ Add restoring of trigger_multiple.
-- ☑ Add restoring of env_render.
+- ☑ Add restoring of env_render, env_beam and env_laser.
 - ☑ Add restoring of light and light_spot.
-- ☑ Add restoring of env_render.
-- ☐ Add restoring of env_beam, env_spark and env_laser.
-- ☐ Add restoring of momentary_door, momentary_rot_button and func_pendulum. 
+- ☐ Add restoring of env_spark.
 - ☐ Add restoring of cycler_sprite.
-- ☐ Add restoring of items and weapons by using a wildcard. Example: hl_restore_register("weapon_*", "RestoreItem").
+- ☐ (On Discuss) Add restoring of momentary_door, momentary_rot_button and func_pendulum. 
+- ☐ (On Discuss) Add restoring of items and weapons by using a wildcard. Example: hl_restore_register("weapon_*", "RestoreItem").
 
 ## ☉ Preview
 
-www.youtube.com/watch?v=iblUy8oeQus
+[youtube]iblUy8oeQus[/youtube]
 
 ## ☘ Plugins using this API:
 
+- [HL Zombie Escape](https://forums.alliedmods.net/showthread.php?p=2711023)
 - [HL Deathrun](https://forums.alliedmods.net/showthread.php?p=2652062)
-- MiniVS (not published yet)
+- [MiniVS](https://forums.alliedmods.net/showthread.php?p=2707036)
 
 ## ☆ Thanks to:
 
