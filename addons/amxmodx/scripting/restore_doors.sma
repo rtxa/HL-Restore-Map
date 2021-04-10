@@ -7,7 +7,7 @@
 #include <xs>
 
 #define PLUGIN  "Restore Doors"
-#define VERSION "0.6"
+#define VERSION "0.7"
 #define AUTHOR  "rtxA"
 
 #define Pev_SavedTouchAdress 	pev_iuser4
@@ -38,11 +38,49 @@ public RestoreDoor(ent) {
 	
 	DoorResetPos(ent);
 
+	new activator = get_ent_data_entity(ent, "CBaseToggle", "m_hActivator");
+	if (activator == FM_NULLENT)
+		activator = 0;
+
+	// this isn't finished	
+	if (pev(ent, pev_spawnflags) & SF_DOOR_START_OPEN) {
+		SUB_UseTargets(ent, activator, USE_TOGGLE, 0.0);
+	}
+	
+	new netname[32];
+	pev(ent, pev_netname, netname, charsmax(netname));
+
+	// Fire the close target (if startopen is set, then "top" is closed) - netname is the close target
+	if (netname[0] && pev(ent, pev_spawnflags) & SF_DOOR_START_OPEN) {
+		FireTargets(netname, get_ent_data_entity(ent, "CBaseToggle", "m_hActivator"), ent, USE_TOGGLE, 0.0);
+	}
+
 	if (pev(ent, pev_spawnflags) & SF_DOOR_USE_ONLY) {
 		set_ent_data(ent, "CBaseEntity", "m_pfnTouch", 0);
 	} else {
 		set_ent_data(ent, "CBaseEntity", "m_pfnTouch", pev(ent, Pev_SavedTouchAdress));
 	}
+}
+
+stock FireTargets(const targetName[], const activator, const caller, useType, Float:value) {
+	if (!targetName[0])
+		return;
+	new target;
+	server_print("Activator %d caller %d useType %d value %f", activator, caller, useType, value);
+	while ((target = find_ent_by_tname(target, targetName))) {
+		if (!(pev(target, pev_flags) & FL_KILLME)) {
+			server_print("Executing in ent %d", target);
+			ExecuteHamB(Ham_Use, target, activator, caller, useType, value);
+		}
+	}
+}
+
+stock SUB_UseTargets(const entity, const activator, useType, Float:value) {
+	new target[32];
+	pev(entity, pev_target, target, charsmax(target));
+
+	if (target[0]) 
+		FireTargets(target, activator, entity, useType, value);
 }
 
 DoorResetPos(ent) {
@@ -68,6 +106,23 @@ public RestoreRotDoor(ent) {
 	set_ent_data(ent, "CBaseToggle", "m_toggle_state", TS_AT_BOTTOM);
 	
 	RotDoorResetPos(ent);
+
+	new activator = get_ent_data_entity(ent, "CBaseToggle", "m_hActivator");
+	if (activator == FM_NULLENT)
+		activator = 0;
+
+	// this isn't finished	
+	if (pev(ent, pev_spawnflags) & SF_DOOR_START_OPEN) {
+		SUB_UseTargets(ent, activator, USE_TOGGLE, 0.0);
+	}
+	
+	new netname[32];
+	pev(ent, pev_netname, netname, charsmax(netname));
+
+	// Fire the close target (if startopen is set, then "top" is closed) - netname is the close target
+	if (netname[0] && pev(ent, pev_spawnflags) & SF_DOOR_START_OPEN) {
+		FireTargets(netname, get_ent_data_entity(ent, "CBaseToggle", "m_hActivator"), ent, USE_TOGGLE, 0.0);
+	}
 
 	if (pev(ent, pev_spawnflags) & SF_DOOR_USE_ONLY) {
 		set_ent_data(ent, "CBaseEntity", "m_pfnTouch", 0);
