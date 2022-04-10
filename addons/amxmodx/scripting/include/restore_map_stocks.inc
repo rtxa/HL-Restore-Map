@@ -38,6 +38,28 @@ stock AxisDir(ent) {
 	}
 }
 
+stock FireTargets(const targetName[], const activator, const caller, useType, Float:value) {
+	if (!targetName[0])
+		return;
+		
+	new target;
+	server_print("Activator %d caller %d useType %d value %f", activator, caller, useType, value);	
+	while ((target = find_ent_by_tname(target, targetName))) {
+		if (!(pev(target, pev_flags) & FL_KILLME)) {
+			server_print("Executing in ent %d", target);
+			ExecuteHamB(Ham_Use, target, activator, caller, useType, value);
+		}
+	}
+}
+
+stock SUB_UseTargets(const entity, const activator, useType, Float:value) {
+	new target[32];
+	pev(entity, pev_target, target, charsmax(target));
+
+	if (target[0]) 
+		FireTargets(target, activator, entity, useType, value);
+}
+
 stock get_skill_cvar_string(const name[], output[], len) {
 	new skill = clamp(get_cvar_num("skill"), 1, 3);
 	get_cvar_string(fmt("%s%d", name, skill), output, len);
