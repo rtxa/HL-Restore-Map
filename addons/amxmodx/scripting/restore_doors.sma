@@ -38,22 +38,7 @@ public RestoreDoor(ent) {
 	
 	DoorResetPos(ent);
 
-	new activator = get_ent_data_entity(ent, "CBaseToggle", "m_hActivator");
-	if (activator == FM_NULLENT)
-		activator = 0;
-
-	// this isn't finished	
-	if (pev(ent, pev_spawnflags) & SF_DOOR_START_OPEN) {
-		SUB_UseTargets(ent, activator, USE_TOGGLE, 0.0);
-	}
-	
-	new netname[32];
-	pev(ent, pev_netname, netname, charsmax(netname));
-
-	// Fire the close target (if startopen is set, then "top" is closed) - netname is the close target
-	if (netname[0] && pev(ent, pev_spawnflags) & SF_DOOR_START_OPEN) {
-		FireTargets(netname, get_ent_data_entity(ent, "CBaseToggle", "m_hActivator"), ent, USE_TOGGLE, 0.0);
-	}
+	CallDoorTargets(ent);
 
 	if (pev(ent, pev_spawnflags) & SF_DOOR_USE_ONLY) {
 		set_ent_data(ent, "CBaseEntity", "m_pfnTouch", 0);
@@ -86,22 +71,7 @@ public RestoreRotDoor(ent) {
 	
 	RotDoorResetPos(ent);
 
-	new activator = get_ent_data_entity(ent, "CBaseToggle", "m_hActivator");
-	if (activator == FM_NULLENT)
-		activator = 0;
-
-	// this isn't finished	
-	if (pev(ent, pev_spawnflags) & SF_DOOR_START_OPEN) {
-		SUB_UseTargets(ent, activator, USE_TOGGLE, 0.0);
-	}
-	
-	new netname[32];
-	pev(ent, pev_netname, netname, charsmax(netname));
-
-	// Fire the close target (if startopen is set, then "top" is closed) - netname is the close target
-	if (netname[0] && pev(ent, pev_spawnflags) & SF_DOOR_START_OPEN) {
-		FireTargets(netname, get_ent_data_entity(ent, "CBaseToggle", "m_hActivator"), ent, USE_TOGGLE, 0.0);
-	}
+	CallDoorTargets(ent);
 
 	if (pev(ent, pev_spawnflags) & SF_DOOR_USE_ONLY) {
 		set_ent_data(ent, "CBaseEntity", "m_pfnTouch", 0);
@@ -129,4 +99,25 @@ RotDoorResetPos(ent) {
 	new Float:angle1[3];
 	get_ent_data_vector(ent, "CBaseToggle", "m_vecAngle1", angle1);
 	set_pev(ent, pev_angles, angle1);
+}
+
+// ================= Private functions ===========================
+
+CallDoorTargets(ent) {
+	new activator = get_ent_data_entity(ent, "CBaseToggle", "m_hActivator");
+	if (activator == FM_NULLENT)
+		activator = 0;
+
+	// this isn't finished	
+	if (pev(ent, pev_spawnflags) & SF_DOOR_START_OPEN) {
+		SUB_UseTargets(ent, activator, USE_TOGGLE, 0.0);
+	}
+	
+	new netname[32];
+	pev(ent, pev_netname, netname, charsmax(netname));
+
+	// Fire the close target (if startopen is set, then "top" is closed) - netname is the close target
+	if (netname[0] && pev(ent, pev_spawnflags) & SF_DOOR_START_OPEN) {
+		FireTargets(netname, get_ent_data_entity(ent, "CBaseToggle", "m_hActivator"), ent, USE_TOGGLE, 0.0);
+	}
 }
