@@ -43,6 +43,17 @@ public RestoreDoor(ent) {
 	} else {
 		set_ent_data(ent, "CBaseEntity", "m_pfnTouch", pev(ent, Pev_SavedTouchAdress));
 	}
+
+	new netname[32];
+	pev(ent, pev_netname), netname, charsmax(netname);
+
+	/*// Fire the close target (if startopen is set, then "top" is closed) - netname is the close target
+	if (netname[0] && !(pev(ent, pev_spawnflags) & SF_DOOR_START_OPEN))
+	{
+		FireTargets(STRING(pev->netname), m_hActivator, this, USE_TOGGLE, 0);
+	}*/
+
+	// fix stop noise of doors
 }
 
 DoorResetPos(ent) {
